@@ -12,8 +12,7 @@ import { appConfig } from '../data/appConfig'; // Import config
  */
 const calculateRiskLevel = (satellitePercentage) => {
   if (satellitePercentage <= 10) return "Low";
-  if (satellitePercentage <= 25) return "Low-Moderate";
-  if (satellitePercentage <= 40) return "Moderate";
+  if (satellitePercentage <= 30) return "Moderate";
   if (satellitePercentage <= 60) return "Moderate-High";
   return "High";
 };
