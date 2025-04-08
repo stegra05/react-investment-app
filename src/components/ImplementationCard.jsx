@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import { ExternalLink, Globe, Euro, LineChart, Landmark, HandCoins, Rocket, Combine } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,7 +18,7 @@ const iconMap = {
  * Renders a single implementation card.
  * @param {{ cardData: object, isHighlighted: boolean, rationale: string | null }} props
  */
-function ImplementationCard({ cardData, isHighlighted, rationale }) {
+const ImplementationCard = forwardRef(({ cardData, isHighlighted, rationale }, ref) => {
   const { id, title, icon, iconColor = 'indigo', link, description, isin, ter, why, delay, isOptional, isSuggested } = cardData;
 
   const IconComponent = iconMap[icon] || Globe; // Default to Globe if icon not found
@@ -44,7 +44,7 @@ function ImplementationCard({ cardData, isHighlighted, rationale }) {
   }
 
   return (
-    <div id={id} className={cardClasses} data-aos="fade-up" data-aos-delay={delay || 0}>
+    <div id={id} className={cardClasses} data-aos="fade-up" data-aos-delay={delay || 0} ref={ref}>
       <div>
         <div className="flex justify-between items-start mb-2">
           <h4 className={`font-semibold text-gray-800 dark:text-gray-200 flex items-center ${isSuggested ? 'text-rose-800 dark:text-rose-200' : ''}`}>
@@ -80,7 +80,7 @@ function ImplementationCard({ cardData, isHighlighted, rationale }) {
       {why && !isHighlighted && <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">{`Why: ${why}`}</p>}
     </div>
   );
-}
+});
 
 // Add propTypes definition
 ImplementationCard.propTypes = {
@@ -102,5 +102,7 @@ ImplementationCard.propTypes = {
   isHighlighted: PropTypes.bool.isRequired,
   rationale: PropTypes.string, // Can be null
 };
+
+ImplementationCard.displayName = 'ImplementationCard'; // Add display name for DevTools
 
 export default ImplementationCard; 

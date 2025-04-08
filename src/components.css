@@ -26,12 +26,37 @@ input[type=range]::-moz-range-thumb { width: 20px; height: 20px; background: #4f
     box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); /* Indigo shadow */
     transition: all 0.2s ease-in-out;
     transform: scale(1.03);
+    animation: pulse 0.8s ease-in-out; /* Add pulse animation */
 }
 
 /* Dark mode highlight card */
 .dark .highlight-card {
     border-color: #818cf8 !important; /* Indigo-400 */
     box-shadow: 0 4px 20px rgba(129, 140, 248, 0.4); /* Indigo-400 shadow */
+    animation: pulse-dark 0.8s ease-in-out; /* Add pulse animation for dark mode */
+}
+
+/* Add Keyframes for Pulse Animation */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1.03);
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+}
+
+@keyframes pulse-dark {
+    0%, 100% {
+        transform: scale(1.03);
+        box-shadow: 0 4px 20px rgba(129, 140, 248, 0.4);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 6px 25px rgba(129, 140, 248, 0.5);
+    }
 }
 
 /* Implementation Card Base Styles & Hover */

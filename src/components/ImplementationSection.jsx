@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import PropTypes from 'prop-types'; // Import PropTypes
 import { ExternalLink, Globe, Euro, LineChart, Landmark, HandCoins, Rocket, Combine, Info } from 'lucide-react'; // Relevant icons
 import ImplementationCard from './ImplementationCard'; // Import the reusable card
@@ -120,6 +120,7 @@ const chinaCardsData = [
 function ImplementationSection({ 
   highlightedCoreIndex, 
   highlightedRationale, 
+  registerCardRef,
 }) {
   const { coreAmount, coreAllocations, satelliteAmount } = usePlan(); // Use context hook
 
@@ -152,9 +153,10 @@ function ImplementationSection({
             {coreCardsDataWithAmounts.map((card, index) => (
               <ImplementationCard
                 key={card.id}
+                ref={(el) => registerCardRef(index, el)}
                 cardData={card}
-                isHighlighted={index === highlightedCoreIndex} // Highlight based on prop
-                rationale={index === highlightedCoreIndex ? highlightedRationale : null} // Pass rationale only if highlighted
+                isHighlighted={index === highlightedCoreIndex}
+                rationale={index === highlightedCoreIndex ? highlightedRationale : null}
               />
             ))}
           </div>
@@ -216,6 +218,7 @@ function ImplementationSection({
 ImplementationSection.propTypes = {
   highlightedCoreIndex: PropTypes.number, // Can be null
   highlightedRationale: PropTypes.string, // Can be null
+  registerCardRef: PropTypes.func.isRequired, // Add prop type for the callback
 };
 
 export default ImplementationSection; 

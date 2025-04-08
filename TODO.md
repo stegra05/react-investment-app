@@ -4,85 +4,155 @@ This document outlines potential improvements and new features for the React Inv
 
 ## 1. UX Improvements & Clarifications
 
-*   **Improve Rationale-Highlight Connection:**
-    *   **Problem:** When a core allocation slice is clicked (`CoreAllocationChart`), the rationale appears under the chart (`CorePortfolioSection`) while the corresponding card (`ImplementationCard`) is highlighted further down (`ImplementationSection`). This connection isn't immediately obvious.
-    *   **Goal:** Make the link between the selected chart slice, its rationale, and the highlighted implementation card clearer.
+*   **Improve Core Chart -> Implementation Card Connection:**
+    *   **Problem:** Clicking a core allocation slice highlights a card further down, and the rationale appears within that card. The connection isn't immediate or obvious due to distance.
+    *   **Goal:** Make the link between the selected chart slice, its rationale, and the highlighted implementation card clearer and more direct.
     *   **Ideas:**
-        *   Animate the rationale text appearing closer to the highlighted `ImplementationCard`.
-        *   Display the rationale in a tooltip or popover directly on the selected chart slice or the highlighted card.
-        *   Use a subtle visual cue (e.g., brief animated line) drawing attention from the chart slice/rationale area to the highlighted card.
-    *   **Files involved:** `App.jsx` (state management), `CorePortfolioSection.jsx` (rationale display), `CoreAllocationChart.jsx` (slice selection event), `ImplementationSection.jsx` (card rendering), `ImplementationCard.jsx` (highlighting).
+        *   Animate scrolling the page smoothly to bring the highlighted `ImplementationCard` into or closer to the viewport when a slice is clicked.
+        *   Add a brief visual pulse/flash animation to the `ImplementationCard` upon highlighting.
+        *   (Optional/Advanced) Experiment with a temporary animated visual connector (e.g., subtle dashed line) from the chart slice towards the card.
+    *   **Files involved:** `App.jsx` (state, possibly scroll logic), `CoreAllocationChart.jsx` (slice selection event), `ImplementationSection.jsx` (card rendering/passing props), `ImplementationCard.jsx` (receiving highlight/rationale, animation).
 
 *   **Refine Highlight Clearing Logic:**
-    *   **Problem:** The `README.md` mentions "Refine the logic for clearing the highlighted implementation card (e.g., click outside)". The current implementation in `App.jsx` uses `handleCoreSliceSelect` and `clearCoreHighlight` but doesn't specify the trigger for clearing (commented out deselect logic, mouseLeave suggestion in chart).
-    *   **Goal:** Implement a clear and intuitive way to deselect/clear the highlight on the `ImplementationCard`.
-    *   **Ideas:**
-        *   Clicking the same slice again toggles the highlight off (`setHighlightedCoreIndex(prevIndex => prevIndex === index ? null : index);`).
-        *   Clicking anywhere outside the chart or the highlighted cards clears the highlight (implement a click-outside listener, perhaps at the `App.jsx` level or within `CorePortfolioSection`).
-    *   **Files involved:** `App.jsx`, `CoreAllocationChart.jsx`.
+    *   **Problem:** The method for clearing the `ImplementationCard` highlight isn't fully defined (README suggests click-outside, `App.jsx` allows re-clicking slice).
+    *   **Goal:** Implement a clear, consistent, and intuitive way to deselect/clear the highlight.
+    *   **Tasks:**
+        *   Confirm the re-click toggle logic in `App.jsx` (`handleCoreSliceSelect`) is the desired primary method.
+        *   (Optional) Implement a click-outside listener (e.g., at the `App.jsx` or page level) that calls `setHighlightedCoreIndex(null)` when clicking anywhere *except* the chart slices or the implementation cards themselves. Ensure this doesn't interfere with other interactions.
+    *   **Files involved:** `App.jsx` (state management, potentially click-outside listener), `CoreAllocationChart.jsx` (event handling).
+
+*   **Enhance Input Control Feedback:**
+    *   **Problem:** Sliders/inputs in `GrowthProjectionSection` update the chart, but the feedback loop could be tighter.
+    *   **Goal:** Provide more immediate visual feedback on the chart as sliders/inputs are adjusted.
+    *   **Tasks:**
+        *   Review the debouncing in `GrowthProjectionSection`. Ensure the delay feels responsive but avoids excessive chart re-renders during rapid slider dragging.
+        *   Consider if direct (non-debounced) updates are feasible for certain inputs or if the current debounce (`300ms`) is optimal.
+    *   **Files involved:** `GrowthProjectionSection.jsx` (`useDebouncedCallback`, state updates).
+
+*   **Add Contextual Help/Glossary:**
+    *   **Problem:** Investment terms (Vorabpauschale, TER, ISIN, Sparer-Pauschbetrag, etc.) might be unfamiliar to some users.
+    *   **Goal:** Improve accessibility and understanding by providing in-context explanations.
+    *   **Tasks:**
+        *   Identify key technical terms throughout the application text.
+        *   Add small help icons (`<HelpCircle />` from `lucide-react`) next to these terms.
+        *   Implement simple tooltips (e.g., using basic HTML `title` attribute or a lightweight tooltip library) or modals that display concise definitions when the icon is hovered/clicked.
+    *   **Files involved:** Various Section components (`TaxSection`, `ImplementationSection`, etc.).
 
 ## 2. Feature Enhancements
 
-*   **Dynamic Plan Configuration:**
-    *   **Goal:** Allow users to adjust core parameters of the visualized investment plan instead of it being fixed.
+*   **Implement Dynamic Text Updates:**
+    *   **Problem:** Descriptive text in various sections (Overview, Core Portfolio, etc.) may contain static values (€600, €500, specific percentages) that don't update when the user changes the configuration via `ConfigurationSection`.
+    *   **Goal:** Ensure all displayed text reflects the current plan configuration from `PlanContext`.
     *   **Tasks:**
-        *   Add input controls (e.g., sliders, number inputs) to adjust the Core (€500) vs. Satellite (€100) split, ensuring the total remains €600 (or make the total adjustable too).
-        *   Add input controls (e.g., linked sliders summing to 100%) to adjust the allocation percentages within the Core Portfolio (currently fixed at 60/20/20 for Global/Europe/EM).
-        *   Update the `CoreAllocationChart` to reflect these user-defined percentages dynamically.
-        *   Update the labels/display values throughout the app (e.g., section titles, chart labels) to reflect the adjusted amounts/percentages.
-    *   **Files involved:** `App.jsx` (new state), `OverviewSection.jsx` (display snapshot), `CorePortfolioSection.jsx` (pass data), `CoreAllocationChart.jsx` (use dynamic series/labels).
+        *   Identify all instances of static values/descriptions related to configurable plan parameters (total investment, core/satellite amounts, core allocation percentages) in component JSX.
+        *   Replace static text with dynamic values/text derived from `usePlan()` context hook. Example: `Invest €{totalInvestment} per month` instead of `Invest €600 per month`.
+        *   Update labels and titles dynamically where appropriate (e.g., section headers, chart titles).
+    *   **Files involved:** `OverviewSection.jsx`, `CorePortfolioSection.jsx`, `ChinaSatelliteSection.jsx` (card titles), `LongTermViewSection.jsx`, `ImplementationSection.jsx` (card titles/descriptions), potentially others.
 
-*   **Comparative Growth Projections:**
-    *   **Goal:** Enable users to compare different growth scenarios side-by-side.
+*   **Implement Goal-Seeking Calculation:**
+    *   **Problem:** The growth projection currently only works forward (inputs -> result). A reverse calculation is desirable.
+    *   **Goal:** Add functionality to calculate the required monthly investment needed to reach a specific financial target.
     *   **Tasks:**
-        *   Add functionality in `GrowthProjectionSection` to "save" or "snapshot" the current projection (based on input parameters).
-        *   Allow users to modify inputs and plot a *new* projection line on the *same* `GrowthProjectionChart` alongside the saved baseline(s).
-        *   Use distinct colors and update the chart legend to differentiate between scenarios.
-    *   **Files involved:** `GrowthProjectionSection.jsx` (state for multiple scenarios), `GrowthProjectionChart.jsx` (accept and render multiple series).
-
-*   **Goal-Seeking Calculation:**
-    *   **Goal:** Add a reverse calculation to the growth projection section.
-    *   **Tasks:**
-        *   Add input fields for target portfolio value (€), investment duration (years), and assumed annual return (%).
-        *   Implement the logic to calculate the required monthly investment needed to reach the target under those assumptions.
-        *   Display the result clearly within the `GrowthProjectionSection`.
+        *   Implement the `calculateRequiredMonthly` function (already present in `GrowthProjectionSection.jsx` logic).
+        *   Add input fields in `GrowthProjectionSection` for `targetValue`, `goalDuration`, and `goalReturnRate`.
+        *   Connect these inputs to the state and the `calculateRequiredMonthly` function.
+        *   Display the calculated required monthly investment clearly.
     *   **Files involved:** `GrowthProjectionSection.jsx`.
 
-*   **Visual Tax Impact Estimation (`Vorabpauschale`):**
-    *   **Goal:** Provide a clearer picture of potential tax drag, especially the `Vorabpauschale` relevant for accumulating ETFs in Germany.
+*   **Enhance Tax Section Visualization/Integration:**
+    *   **Problem:** Tax concepts (`Sparer-Pauschbetrag`, `Vorabpauschale`, `Teilfreistellung`) are explained but their interplay isn't fully visualized.
+    *   **Goal:** Provide a clearer picture of potential tax impact.
     *   **Tasks:**
-        *   Add an informational section within `TaxSection.jsx` explaining the `Vorabpauschale` more visually or with an *estimator*.
-        *   (Advanced) Integrate an *estimated* tax drag into the `GrowthProjectionChart`. This requires making assumptions about annual fund performance, the *Basiszins* (base rate published annually by the German government), and applying the ~26.4% tax rate on the calculated *Vorabpauschale* (minus the *Sparer-Pauschbetrag* if applicable). This could be a separate line on the chart showing "Growth after estimated tax".
-    *   **Files involved:** `TaxSection.jsx`, potentially `GrowthProjectionChart.jsx`.
+        *   In `TaxCalculator`, clarify that the calculated `taxableAmount` could potentially be offset by losses or reduced by `Teilfreistellung` if applicable.
+        *   In `VorabpauschaleEstimator`, add an optional input for unused `Sparer-Pauschbetrag` and show how it reduces the `estimatedTax`.
+        *   (Advanced) Add an optional "Estimated Tax Drag" line to the `GrowthProjectionChart`. This would require calculating estimated annual `Vorabpauschale` tax (using the estimator logic) for each year of the projection and subtracting it from the nominal growth. Make assumptions clear (e.g., assumes constant `Basiszins`, uses estimator logic, ignores `Sparer-Pauschbetrag` for the chart line).
+    *   **Files involved:** `TaxCalculator.jsx`, `VorabpauschaleEstimator.jsx`, `TaxSection.jsx`, `GrowthProjectionSection.jsx`, `GrowthProjectionChart.jsx`.
 
-## 3. Potential Advanced Features (Future Scope)
+*   **Implement Strategy Template Selection:**
+    *   **Problem:** Users might prefer pre-defined starting points instead of configuring everything manually. The detailed strategy text describes variations not fully captured by the default UI.
+    *   **Goal:** Offer selectable plan templates that pre-fill the configuration.
+    *   **Tasks:**
+        *   Define 2-3 strategy templates based on the provided text (e.g., "Default 60/20/20 Core + China", "Core + Optional Bonds/Stocks").
+        *   Add a selection mechanism (e.g., dropdown or buttons) probably near `ConfigurationSection`.
+        *   Implement logic so that selecting a template updates the state in `PlanContext` (`totalInvestment`, `coreAmount`, `coreAllocations`) accordingly.
+        *   (Optional) Adjust some descriptive text based on the selected template.
+    *   **Files involved:** `App.jsx` or `PlanContext.jsx` (state logic), `ConfigurationSection.jsx` (UI for selection).
 
-*   **Risk Level Visualization:**
-    *   Instead of just text ("Moderate-High"), use a visual gauge or indicator in `OverviewSection`.
-    *   (More complex) If asset allocation becomes dynamic (Feature Enhancement #2), adjust the risk indicator based on the allocation (e.g., higher equity % increases risk indicator).
+*   **Implement "What If" Scenario Builder:**
+    *   **Problem:** Growth projection is based on constant inputs. Real life involves variations.
+    *   **Goal:** Allow modeling of common financial events.
+    *   **Tasks:**
+        *   Extend `GrowthProjectionSection` UI to allow adding "events" to the timeline (e.g., "Pause contributions from Year X to Y", "Add lump sum of €Z in Year W").
+        *   Modify the `calculateGrowth` logic (or create a more advanced version) to handle these events during the projection loop.
+        *   Visualize these events on the chart (e.g., markers, annotations).
+    *   **Files involved:** `GrowthProjectionSection.jsx`, `GrowthProjectionChart.jsx`.
 
-*   **AI/Data Integration:**
-    *   **Contextual Market Insights:** Integrate external APIs (market data, news feeds) and potentially an LLM to provide brief, relevant commentary alongside portfolio sections (e.g., recent performance drivers for EM). (Requires significant backend/API work).
-    *   **ETF Alternatives:** Integrate an ETF database API to suggest similar, potentially lower-cost ETFs based on the examples shown in `ImplementationSection`.
-    *   **Inflation Adjustment:** Allow users to factor in an assumed inflation rate into the `GrowthProjectionChart` to visualize projected *real* returns.
+## 3. Technical Refinements & Code Quality
 
-## 4. UI/UX & Technical Refinements
+*   **Implement PropTypes Consistently or Migrate to TypeScript:**
+    *   **Problem:** Type safety is lacking (PropTypes used inconsistently, ESLint rule disabled).
+    *   **Goal:** Improve code robustness and maintainability through static typing.
+    *   **Tasks:**
+        *   **Option A (PropTypes):** Go through all components, define `propTypes` for all expected props, and re-enable the `react/prop-types` ESLint rule.
+        *   **Option B (TypeScript):** Migrate the project from `.jsx` to `.tsx`. Define interfaces/types for props, state, and context values. Leverage TypeScript's static analysis benefits. (Larger effort).
+    *   **Files involved:** All `.jsx` component files, `PlanContext.jsx`, `ThemeContext.jsx`, `.eslintrc.cjs`.
 
-*   **Enhanced Animations/Transitions:**
-    *   Explore using a library like Framer Motion for more fluid transitions between component states (e.g., chart updates, rationale appearing/disappearing).
-    *   Refine existing AOS animations for smoothness.
+*   **Add Unit and Integration Tests:**
+    *   **Problem:** No automated tests currently exist.
+    *   **Goal:** Ensure core logic is correct and prevent regressions.
+    *   **Tasks:**
+        *   Set up a testing framework (e.g., Vitest, React Testing Library).
+        *   Write unit tests for utility functions (`calculateGrowth`, tax calculation logic in estimators).
+        *   Write integration tests for key user interactions (e.g., changing projection inputs updates chart, clicking chart slice highlights card, configuring plan updates overview).
+    *   **Files involved:** New test files (`*.test.jsx`), potentially test setup configuration.
 
-*   **Input Control Feedback:**
-    *   Make sliders/inputs in `GrowthProjectionSection` provide more immediate feedback on the chart as they are adjusted (debouncing might be needed for performance).
+*   **Perform Accessibility (A11y) Audit:**
+    *   **Problem:** While some ARIA labels exist, a thorough check is needed.
+    *   **Goal:** Ensure the application is usable for people with disabilities.
+    *   **Tasks:**
+        *   Review semantic HTML structure.
+        *   Verify ARIA attributes for interactive elements (charts, sliders, toggles, menus, accordions). Ensure controls are keyboard navigable and focus indicators are clear.
+        *   Check color contrast ratios, especially for text on background colors and chart elements.
+        *   Provide screen-reader-friendly text alternatives or summaries for complex visualizations like charts. Add `aria-hidden="true"` to purely decorative icons.
+    *   **Files involved:** All component files, potentially `base.css`/`components.css` for focus styles.
 
-*   **Accessibility (A11y) Audit:**
-    *   Perform a thorough review focusing on ARIA attributes for interactive components (charts, sliders, toggles), keyboard navigation, focus management, and color contrast (especially with custom chart colors).
-    *   Provide screen-reader-friendly text summaries for chart data.
+*   **Refactor State Management if Needed:**
+    *   **Problem:** Current Context API use is fine, but might become cumbersome if many more global states are added.
+    *   **Goal:** Maintain manageable state logic as the app grows.
+    *   **Tasks:**
+        *   Monitor prop drilling and context complexity as new features (like templates, advanced scenarios) are added.
+        *   If state logic becomes overly complex or performance issues arise due to context updates, consider refactoring parts of the state management to a dedicated library (e.g., Zustand for simplicity, or Redux Toolkit for more complex state). (Evaluate if necessary later).
+    *   **Files involved:** `App.jsx`, `PlanContext.jsx`, `ThemeContext.jsx`, potentially introducing new state management files.
 
-*   **Code Quality & Maintainability:**
-    *   Add PropTypes or migrate to TypeScript for improved type safety (as noted in `README.md`).
-    *   Add unit/integration tests (e.g., for `calculateGrowth`, `TaxCalculator`, chart interactions).
-    *   Consider using React Context for global state (`isDarkMode`, `highlightedCoreIndex`) if prop drilling becomes too complex as features are added (as noted in `README.md`).
-    *   Make "Last Reviewed" date in `OverviewSection` dynamic or easily configurable.
-    *   Fetch `RevisionHistory` data dynamically if it becomes complex.
-    *   Add a `LICENSE` file. 
+*   **Make Static Dates/Content Configurable:**
+    *   **Problem:** Some content might be hardcoded (e.g., "Last Reviewed" date, revision history entries).
+    *   **Goal:** Make content easier to update without code changes.
+    *   **Tasks:**
+        *   Identify hardcoded dates or content lists (e.g., `RevisionHistorySection`).
+        *   Move this data to a configuration file (e.g., a simple JS object/array) or fetch it if it becomes dynamic.
+        *   Update components to consume this configuration data.
+    *   **Files involved:** `OverviewSection.jsx`, `RevisionHistorySection.jsx`, potentially create a new config file.
+
+*   **Add License File:**
+    *   **Problem:** `README.md` mentions adding a license, but it might be missing or need confirmation.
+    *   **Goal:** Clearly define the project's usage rights.
+    *   **Tasks:**
+        *   Ensure a `LICENSE` file exists at the project root (e.g., using the MIT license text provided).
+    *   **Files involved:** `LICENSE` file.
+
+## 4. Potential Advanced Features (Future Scope)
+
+*   **Monte Carlo Simulation for Projections:**
+    *   Implement probabilistic projections instead of linear ones using Monte Carlo methods. Visualize results as a probability cone or distribution graph.
+
+*   **AI-Driven Insights Integration:**
+    *   Explore integrating an LLM for personalized commentary, risk explanation, or suggesting ETF alternatives (requires careful implementation and disclaimers).
+
+*   **Historical Backtesting Feature:**
+    *   Allow users to see how the configured strategy would have performed historically.
+
+*   **API Integration for Market Data:**
+    *   Fetch and display minor, real-time or recent market trend indicators.
+
+*   **Enhanced Risk Visualization:**
+    *   Dynamically link the `RiskGauge` to the configured asset allocation, adjusting the visual based on the calculated risk of the user's choices.

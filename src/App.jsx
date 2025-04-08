@@ -41,6 +41,14 @@ function AppContent() {
   const [highlightedCoreIndex, setHighlightedCoreIndex] = useState(null);
   const [highlightedRationale, setHighlightedRationale] = useState(null);
 
+  // Ref container for implementation card DOM elements
+  const implementationCardRefs = useRef({});
+
+  // Callback to register refs from ImplementationSection
+  const registerCardRef = useCallback((index, element) => {
+    implementationCardRefs.current[index] = element;
+  }, []); // Empty dependency array, this function never needs to change
+
   // State for plan configuration
   const [totalInvestment, setTotalInvestment] = useState(600);
   const [coreAmount, setCoreAmount] = useState(500);
@@ -64,7 +72,20 @@ function AppContent() {
   // Callback for the Core Allocation Chart slice selection
   const handleCoreSliceSelect = (index) => {
     // Allow deselecting by clicking the same slice again (optional)
-    setHighlightedCoreIndex(prevIndex => prevIndex === index ? null : index);
+    const newIndex = highlightedCoreIndex === index ? null : index;
+    setHighlightedCoreIndex(newIndex);
+
+    // Scroll to the card if a new index is set (and the element exists)
+    if (newIndex !== null) {
+      const cardElement = implementationCardRefs.current[newIndex];
+      if (cardElement) {
+        cardElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest', // Scrolls the element to the nearest edge of the viewport
+          inline: 'nearest'
+        });
+      }
+    }
   };
 
   // TODO: Pass highlightedCoreIndex to ImplementationSection
@@ -103,6 +124,7 @@ function AppContent() {
             coreAmount={coreAmount}
             coreAllocations={coreAllocations}
             satelliteAmount={satelliteAmount}
+            registerCardRef={registerCardRef}
           />
           <TrackingSection />
           <LongTermViewSection />
