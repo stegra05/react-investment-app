@@ -14,18 +14,54 @@ export const ISIN_TO_SYMBOL_MAP = {
 /**
  * Fetches the latest global quote data for a given symbol from Alpha Vantage.
  * Handles API key retrieval from environment variables.
- * 
+ * Implements client-side caching using localStorage to avoid excessive API calls.
+ *
  * @param {string} symbol The stock/ETF symbol compatible with Alpha Vantage (e.g., 'SWDA.LON').
- * @returns {Promise<object>} A promise that resolves to an object containing the quote data 
- *                           (e.g., { data: { ... Alpha Vantage quote ... } }) or an error 
- *                           (e.g., { error: 'API Key Missing' }).
+ * @param {boolean} [forceRefresh=false] If true, bypasses the cache and fetches fresh data.
+ * @returns {Promise<object>} A promise that resolves to an object containing the quote data
+ *                           (e.g., { data: { ... Alpha Vantage quote ... } }) or an error
+ *                           (e.g., { error: 'API Key Missing', source?: 'cache' | 'api' }).
  */
-export async function fetchMarketData(symbol) {
-  const apiKey = import.meta.env.VITE_ALPHA_VANTAGE_API_KEY; // Use Alpha Vantage key
+export async function fetchMarketData(symbol, forceRefresh = false) {
+  const apiKey = import.meta.env.VITE_ALPHA_VANTAGE_API_KEY;
+
+  // --- Caching Logic ---
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const cacheKey = `marketData_${symbol}_${today}`;
+
+  if (!forceRefresh) {
+    try {
+      const cachedDataString = localStorage.getItem(cacheKey);
+      if (cachedDataString) {
+        console.log(`Using cached data for ${symbol} from ${today}`);
+        const cachedData = JSON.parse(cachedDataString);
+        // Ensure the cached structure is valid (has data or error)
+        if (cachedData.data || cachedData.error) {
+           // Add source indicator for clarity, especially for cached errors
+           return { ...cachedData, source: 'cache' };
+        } else {
+          console.warn(`Invalid cached data structure for ${symbol}, removing.`);
+          localStorage.removeItem(cacheKey); // Remove invalid cache entry
+        }
+      }
+    } catch (error) {
+      console.error(`Error reading or parsing cache for ${symbol}:`, error);
+      // Optionally remove potentially corrupted cache entry
+      localStorage.removeItem(cacheKey);
+    }
+  }
+  // --- End Caching Logic ---
 
   if (!apiKey) {
     console.error('Alpha Vantage API key is missing. Please set VITE_ALPHA_VANTAGE_API_KEY in your .env file.');
-    return { error: 'API Key Missing' }; 
+    // Cache the API key error as well, associated with the symbol for today
+    const errorResult = { error: 'API Key Missing', source: 'api' };
+    try {
+        localStorage.setItem(cacheKey, JSON.stringify(errorResult));
+    } catch (cacheError) {
+        console.error('Failed to cache API key error:', cacheError);
+    }
+    return errorResult;
   }
 
   // Alpha Vantage GLOBAL_QUOTE endpoint
@@ -35,12 +71,11 @@ export async function fetchMarketData(symbol) {
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      // Throw an error with status text, which might contain useful info from Alpha Vantage
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`); 
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
-    
+
     const data = await response.json();
-    
+
     // Check for API error messages within the JSON response
     if (data['Error Message']) {
       throw new Error(`API Error: ${data['Error Message']}`);
@@ -53,17 +88,25 @@ export async function fetchMarketData(symbol) {
       }
       // If the note isn't about rate limits but data is missing, could be an issue
       if (!data['Global Quote'] || Object.keys(data['Global Quote']).length === 0) {
-        throw new Error('API returned a note but no quote data.'); 
+        // Allow caching this "note" state, might be temporary issue
+         console.warn('API returned a note but no quote data for symbol:', symbol);
+         // Let it proceed to the check below, which will throw 'No quote data found'
       }
     }
 
     // Check if 'Global Quote' data is present and not empty
     if (data['Global Quote'] && Object.keys(data['Global Quote']).length > 0) {
-      return { data: data['Global Quote'] }; // Return the 'Global Quote' object
+       const result = { data: data['Global Quote'], source: 'api' };
+       try {
+         localStorage.setItem(cacheKey, JSON.stringify(result)); // Cache successful result
+       } catch (cacheError) {
+         console.error(`Failed to cache data for ${symbol}:`, cacheError);
+       }
+       return result; // Return the 'Global Quote' object
     } else {
       // Handle cases where the symbol might be valid but returns no data or unexpected format
       console.warn('No detailed quote data returned for symbol:', symbol, 'Response:', data);
-      throw new Error('No quote data found for symbol.'); 
+      throw new Error('No quote data found for symbol.');
     }
 
   } catch (error) {
@@ -71,7 +114,15 @@ export async function fetchMarketData(symbol) {
     let displayError = error.message || 'Fetch Error';
      if (displayError.includes("API key")) displayError = "Invalid or Missing API Key";
      if (displayError.includes("limit")) displayError = "API Rate Limit Reached";
+     if (displayError.includes("quote data found")) displayError = "No Quote Data Found"; // Sanitize this specific error
 
-    return { error: displayError }; // Return sanitized error message
+    const errorResult = { error: displayError, source: 'api' };
+     try {
+       // Cache the error result too, to prevent repeated failed calls within the day
+       localStorage.setItem(cacheKey, JSON.stringify(errorResult));
+     } catch (cacheError) {
+       console.error(`Failed to cache error for ${symbol}:`, cacheError);
+     }
+    return errorResult; // Return sanitized error message
   }
 } 

@@ -14,14 +14,17 @@ function VorabpauschaleEstimator() {
   const [unusedAllowance, setUnusedAllowance] = useState(0); // Add state for unused allowance
 
   const [basisertrag, setBasisertrag] = useState(0);
+  const [teilfreistellungAmount, setTeilfreistellungAmount] = useState(0); // State for the 30% amount
   const [vorabpauschale, setVorabpauschale] = useState(0);
+  const [taxableBeforeAllowance, setTaxableBeforeAllowance] = useState(0); // State for pre-allowance taxable amount
   const [estimatedTax, setEstimatedTax] = useState(0);
 
   useEffect(() => {
     // Use the imported calculation function
     const { 
       basisertrag: calculatedBasisertrag, 
-      vorabpauschale: calculatedVorabpauschale, 
+      teilfreistellungAmount: calculatedTeilfreistellungAmount, // Get the new value
+      taxableVorabpauschaleBeforeAllowance: calculatedTaxableBeforeAllowance, // Get the new value
       estimatedTax: calculatedTax 
     } = calculateVorabpauschaleEstimate({
       portfolioValue,
@@ -32,7 +35,9 @@ function VorabpauschaleEstimator() {
 
     // Update state with results
     setBasisertrag(calculatedBasisertrag);
-    setVorabpauschale(calculatedVorabpauschale);
+    setVorabpauschale(calculatedTaxableBeforeAllowance);
+    setTeilfreistellungAmount(calculatedTeilfreistellungAmount); // Store the Teilfreistellung amount
+    setTaxableBeforeAllowance(calculatedTaxableBeforeAllowance); // Store the taxable amount before allowance
     setEstimatedTax(calculatedTax);
 
   }, [portfolioValue, fundGainPercent, basiszinsPercent, unusedAllowance]); // Dependencies remain the same
@@ -100,23 +105,32 @@ function VorabpauschaleEstimator() {
         </div>
       </div>
 
-      {/* Results */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center p-3 bg-indigo-50 dark:bg-indigo-900/40 rounded-md border border-indigo-100 dark:border-indigo-800/50">
-        <div>
-          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-            <InfoTooltip term="Basisertrag" definition="Base income calculated (Fund Value * Basiszins * 0.7), capped by actual fund gain." /> (Capped)
-          </p>
-          <p className="text-lg font-semibold text-indigo-800 dark:text-indigo-300">€{basisertrag.toFixed(2)}</p>
+      {/* Results - Updated Layout */}
+      <div className="text-sm p-3 bg-indigo-50 dark:bg-indigo-900/40 rounded-md border border-indigo-100 dark:border-indigo-800/50 space-y-2">
+        {/* Calculation Breakdown */}
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 dark:text-gray-300">
+            <InfoTooltip term="Basisertrag" definition="Base income calculated (Fund Value * Basiszins * 0.7), capped by actual fund gain." /> (Capped):
+          </span>
+          <span className="font-medium text-indigo-800 dark:text-indigo-300">€{basisertrag.toFixed(2)}</span>
         </div>
-        <div>
-           <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-             <InfoTooltip term="Vorabpauschale" definition="Taxable portion (Basisertrag * 0.7 for equity funds due to Teilfreistellung)." /> (Equity)
-           </p>
-          <p className="text-lg font-semibold text-indigo-800 dark:text-indigo-300">€{vorabpauschale.toFixed(2)}</p>
+        <div className="flex justify-between items-center pl-4 border-l-2 border-gray-300 dark:border-gray-600 ml-1">
+          <span className="text-gray-500 dark:text-gray-400">Less 30% Teilfreistellung (Equity):</span>
+          <span className="font-medium text-red-600 dark:text-red-400">- €{teilfreistellungAmount.toFixed(2)}</span>
         </div>
-        <div>
-           <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Estimated Tax (~26.4%)</p>
-          <p className="text-lg font-semibold text-indigo-800 dark:text-indigo-300">€{estimatedTax.toFixed(2)}</p>
+        <div className="flex justify-between items-center font-semibold border-t border-gray-200 dark:border-gray-700 pt-1 mt-1">
+          <span className="text-gray-700 dark:text-gray-200">
+             = Taxable Vorabpauschale <span className="text-xs font-normal">(before allowance)</span>:
+          </span>
+          <span className="text-indigo-800 dark:text-indigo-300">€{taxableBeforeAllowance.toFixed(2)}</span>
+        </div>
+
+        {/* Final Tax */}
+        <div className="flex justify-between items-center font-semibold text-lg border-t-2 border-indigo-200 dark:border-indigo-700 pt-2 mt-3">
+          <span className="text-indigo-800 dark:text-indigo-300">
+            Estimated Tax <span className="text-xs font-normal">(~26.4%, after allowance)</span>:
+          </span>
+          <span className="text-indigo-800 dark:text-indigo-300">€{estimatedTax.toFixed(2)}</span>
         </div>
       </div>
       <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">

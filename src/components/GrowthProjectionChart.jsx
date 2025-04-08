@@ -35,12 +35,12 @@ const getGrowthChartOptions = (isDark, seriesData = [], annotations = {}) => {
     dataLabels: { enabled: false },
     stroke: { 
       curve: 'smooth', 
-      width: seriesData.map(s => s.type === 'area' ? 2 : 3) // Thinner for area, thicker for lines
+      width: seriesData.map(s => (s.name && s.name.startsWith('Saved #')) ? 1.5 : (s.type === 'area' ? 2 : 3)),
+      dashArray: seriesData.map(s => (s.name && s.name.startsWith('Saved #')) ? 4 : 0)
     },
     fill: {
-      // Apply fill only to the 'area' type series
-      type: seriesData.map(s => s.type === 'area' ? 'gradient' : 'solid'),
-      opacity: seriesData.map(s => s.type === 'area' ? 1 : 0.85), // Adjusted opacity
+      type: seriesData.map(s => (s.name && s.name.startsWith('Saved #')) ? 'solid' : (s.type === 'area' ? 'gradient' : 'solid')),
+      opacity: seriesData.map(s => (s.name && s.name.startsWith('Saved #')) ? 1 : (s.type === 'area' ? 1 : 0.85)),
       gradient: {
         shadeIntensity: 1,
         opacityFrom: 0.7,
@@ -82,7 +82,13 @@ const getGrowthChartOptions = (isDark, seriesData = [], annotations = {}) => {
       horizontalAlign: 'center',
       labels: { colors: colors.textColor },
       markers: { width: 12, height: 12, radius: 6 },
-      itemMargin: { horizontal: 10, vertical: 5 }
+      itemMargin: { horizontal: 10, vertical: 5 },
+      onItemClick: {
+        toggleDataSeries: true
+      },
+      onItemHover: {
+        highlightDataSeries: true
+      }
     },
     markers: {
       size: 0, // Hide markers by default

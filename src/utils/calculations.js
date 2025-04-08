@@ -117,7 +117,7 @@ export const prepareProjectionSeries = (nominalData, inflationDecimal) => {
  * @param {number} params.fundGainPercent
  * @param {number} params.basiszinsPercent
  * @param {number} params.unusedAllowance
- * @returns {{basisertrag: number, vorabpauschale: number, estimatedTax: number}}
+ * @returns {{basisertrag: number, teilfreistellungAmount: number, vorabpauschale: number, taxableVorabpauschaleBeforeAllowance: number, estimatedTax: number}}
  */
 export const calculateVorabpauschaleEstimate = ({ 
     portfolioValue, 
@@ -134,18 +134,24 @@ export const calculateVorabpauschaleEstimate = ({
     // Basisertrag is capped by the actual fund gain
     const calculatedBasisertrag = Math.max(0, Math.min(calculatedBasisertragFull, actualFundGainValue));
     
-    // Vorabpauschale is 70% of Basisertrag (Teilfreistellung for equity funds)
-    const calculatedVorabpauschale = calculatedBasisertrag * 0.7;
+    // Calculate Teilfreistellung amount (30% of Basisertrag for equity)
+    const teilfreistellungAmount = calculatedBasisertrag * 0.3;
+    
+    // Vorabpauschale is Basisertrag minus Teilfreistellung
+    // const calculatedVorabpauschale_old = calculatedBasisertrag * 0.7;
+    const taxableVorabpauschaleBeforeAllowance = calculatedBasisertrag - teilfreistellungAmount;
     
     // Apply unused allowance before calculating tax
-    const taxableVorabpauschale = Math.max(0, calculatedVorabpauschale - unusedAllowance);
+    const taxableVorabpauschaleAfterAllowance = Math.max(0, taxableVorabpauschaleBeforeAllowance - unusedAllowance);
     
-    // Tax is ~26.375% of the potentially taxable Vorabpauschale
-    const calculatedTax = taxableVorabpauschale * 0.26375;
+    // Tax is ~26.375% of the potentially taxable Vorabpauschale (after allowance)
+    const calculatedTax = taxableVorabpauschaleAfterAllowance * 0.26375;
 
     return {
-        basisertrag: calculatedBasisertrag,
-        vorabpauschale: calculatedVorabpauschale,
-        estimatedTax: calculatedTax,
+        basisertrag: calculatedBasisertrag,               // Basisertrag (capped)
+        teilfreistellungAmount: teilfreistellungAmount,   // The 30% reduction amount
+        vorabpauschale: taxableVorabpauschaleBeforeAllowance, // Renamed for clarity in UI context
+        taxableVorabpauschaleBeforeAllowance: taxableVorabpauschaleBeforeAllowance, // Explicitly named for UI
+        estimatedTax: calculatedTax,                     // Final tax after allowance
     };
 }; 

@@ -65,6 +65,9 @@ function TaxCalculator() {
       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
         Note: This calculation does not include the <em>Teilfreistellung</em> (partial exemption) for equity funds, which further reduces the taxable amount on actual gains/distributions. It also does not account for offsetting losses.
       </p>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        Note: Jointly assessed couples have a higher allowance of €2,000.
+      </p>
     </div>
   );
 }
