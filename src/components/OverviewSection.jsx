@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { CalendarDays, Clock, TrendingUp, Scale } from 'lucide-react';
 import { usePlan } from '../context/PlanContext'; // Import usePlan hook
 import RiskGauge from './RiskGauge'; // Import the RiskGauge component
+import { appConfig } from '../data/appConfig'; // Import config
 
 /**
  * Renders the Overview section.
@@ -61,7 +62,7 @@ function OverviewSection() {
           <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">Next Review Due</h3>
           <div className="flex items-center justify-center text-cyan-600 dark:text-cyan-400 mt-4 mb-2">
             <CalendarDays className="h-8 w-8 mr-2" aria-hidden="true" />
-            <span className="text-xl font-bold text-gray-800 dark:text-gray-200">~2030</span>
+            <span className="text-xl font-bold text-gray-800 dark:text-gray-200">{appConfig.nextReviewYear}</span>
           </div>
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Approx. 5 Years</p>
         </div>
@@ -74,12 +75,16 @@ function OverviewSection() {
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">(€{coreAmount} / €{satelliteAmount})</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700 text-center">
-          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center justify-center"><CalendarDays size={14} className="mr-1.5"/>Target Horizon</h3>
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center justify-center">
+            <CalendarDays size={14} className="mr-1.5" aria-hidden="true"/>Target Horizon
+          </h3>
           <p className="text-2xl font-bold text-gray-900 dark:text-white">20+ Years</p>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Long-term capital growth focus</p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700 flex flex-col justify-center items-center">
-          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center"><Scale size={14} className="mr-1.5"/>Risk Profile</h3>
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center">
+            <Scale size={14} className="mr-1.5" aria-hidden="true"/>Risk Profile
+          </h3>
           <RiskGauge level="Moderate-High" />
         </div>
       </div>

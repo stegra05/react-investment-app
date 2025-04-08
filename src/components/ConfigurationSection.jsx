@@ -108,7 +108,7 @@ function ConfigurationSection() {
   return (
     <section id="configuration" className="mb-16 scroll-mt-16 bg-white dark:bg-gray-800 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-700" data-aos="fade-up">
       <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 border-b pb-2 border-gray-300 dark:border-gray-600 flex items-center">
-        <SlidersHorizontal size={28} className="mr-3 text-indigo-600 dark:text-indigo-500" /> Plan Configuration
+        <SlidersHorizontal size={28} className="mr-3 text-indigo-600 dark:text-indigo-500" aria-hidden="true" /> Plan Configuration
       </h2>
 
       <div className="grid md:grid-cols-2 gap-8">
@@ -176,7 +176,7 @@ function ConfigurationSection() {
       {/* --- Template Selection --- */}
       <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-600">
         <h3 className="text-lg font-semibold mb-3 text-indigo-700 dark:text-indigo-400 flex items-center">
-          <BoxSelect size={20} className="mr-2" /> Load a Template
+          <BoxSelect size={20} className="mr-2" aria-hidden="true" /> Load a Template
         </h3>
         <div className="flex flex-wrap gap-3">
           <button

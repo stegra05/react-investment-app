@@ -18,7 +18,7 @@ function LongTermViewSection() {
         <div className="grid md:grid-cols-2 gap-8">
           <div>
             <h3 className="text-xl font-semibold mb-3 text-teal-700 dark:text-teal-400 flex items-center">
-              <TrendingUp size={20} className="mr-2" />
+              <TrendingUp size={20} className="mr-2" aria-hidden="true" />
               Compounding & Consistency
             </h3>
             <p className="text-gray-700 dark:text-gray-300 mb-4">
@@ -28,7 +28,7 @@ function LongTermViewSection() {
           </div>
           <div>
             <h3 className="text-xl font-semibold mb-3 text-cyan-700 dark:text-cyan-400 flex items-center">
-              <Zap size={20} className="mr-2" />
+              <Zap size={20} className="mr-2" aria-hidden="true" />
               5-Year Review & Rebalancing
             </h3>
             <p className="text-gray-700 dark:text-gray-300 mb-4">

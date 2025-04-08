@@ -1,16 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types'; // Import PropTypes
 import { ChevronRight } from 'lucide-react'; // Icon for the details toggle
+import { appConfig } from '../data/appConfig'; // Import config
 
 /**
  * Renders the Revision History section.
  */
 function RevisionHistorySection() {
+  // Use revisions from config
+  const { revisions } = appConfig;
+
   // TODO: Fetch revision history dynamically or manage it elsewhere
-  const revisions = [
-    { date: 'June 2024', description: 'Initial Plan Setup & First React Version.' },
-    // Add more revisions here as needed
-  ];
+  // const revisions = [
+  //   { date: 'June 2024', description: 'Initial Plan Setup & First React Version.' },
+  //   // Add more revisions here as needed
+  // ];
 
   return (
     <section id="revision-history" className="mb-8 scroll-mt-16" data-aos="fade-up">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Percent, HelpCircle } from 'lucide-react';
 import InfoTooltip from './InfoTooltip';
+import { calculateVorabpauschaleEstimate } from '../utils/calculations'; // Import the calculation function
 
 /**
  * Provides a simplified, illustrative estimator for the German Vorabpauschale tax.
@@ -17,30 +18,24 @@ function VorabpauschaleEstimator() {
   const [estimatedTax, setEstimatedTax] = useState(0);
 
   useEffect(() => {
-    // Calculate estimator values whenever inputs change
-    const basiszinsDecimal = basiszinsPercent / 100;
-    const fundGainDecimal = fundGainPercent / 100;
+    // Use the imported calculation function
+    const { 
+      basisertrag: calculatedBasisertrag, 
+      vorabpauschale: calculatedVorabpauschale, 
+      estimatedTax: calculatedTax 
+    } = calculateVorabpauschaleEstimate({
+      portfolioValue,
+      fundGainPercent,
+      basiszinsPercent,
+      unusedAllowance
+    });
 
-    const calculatedBasisertragFull = portfolioValue * basiszinsDecimal * 0.7; // 70% factor for Basisertrag
-    const actualFundGainValue = portfolioValue * fundGainDecimal;
-    
-    // Basisertrag is capped by the actual fund gain
-    const calculatedBasisertrag = Math.max(0, Math.min(calculatedBasisertragFull, actualFundGainValue));
-    
-    // Vorabpauschale is 70% of Basisertrag (Teilfreistellung for equity funds)
-    const calculatedVorabpauschale = calculatedBasisertrag * 0.7;
-    
-    // Apply unused allowance before calculating tax
-    const taxableVorabpauschale = Math.max(0, calculatedVorabpauschale - unusedAllowance);
-    
-    // Tax is ~26.375% of the potentially taxable Vorabpauschale
-    const calculatedTax = taxableVorabpauschale * 0.26375;
-
+    // Update state with results
     setBasisertrag(calculatedBasisertrag);
     setVorabpauschale(calculatedVorabpauschale);
     setEstimatedTax(calculatedTax);
 
-  }, [portfolioValue, fundGainPercent, basiszinsPercent, unusedAllowance]); // Add unusedAllowance to dependencies
+  }, [portfolioValue, fundGainPercent, basiszinsPercent, unusedAllowance]); // Dependencies remain the same
 
   return (
     <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
