@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { CalendarDays, Clock, TrendingUp } from 'lucide-react';
+import { CalendarDays, Clock, TrendingUp, Scale } from 'lucide-react';
 import { usePlan } from '../context/PlanContext'; // Import usePlan hook
+import RiskGauge from './RiskGauge'; // Import the RiskGauge component
 
 /**
  * Renders the Overview section.
@@ -63,6 +64,23 @@ function OverviewSection() {
             <span className="text-xl font-bold text-gray-800 dark:text-gray-200">~2030</span>
           </div>
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Approx. 5 Years</p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-12" data-aos="fade-up" data-aos-delay="150">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700 text-center">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Investment Split</h3>
+          <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{corePercentage}% Core</p>
+          <p className="text-xl font-bold text-purple-600 dark:text-purple-400">{satellitePercentage}% Satellite</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">(€{coreAmount} / €{satelliteAmount})</p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700 text-center">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center justify-center"><CalendarDays size={14} className="mr-1.5"/>Target Horizon</h3>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">20+ Years</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Long-term capital growth focus</p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700 flex flex-col justify-center items-center">
+          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center"><Scale size={14} className="mr-1.5"/>Risk Profile</h3>
+          <RiskGauge level="Moderate-High" />
         </div>
       </div>
     </section>

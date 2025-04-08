@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types'; // Import PropTypes
 import GrowthProjectionChart from './GrowthProjectionChart'; // Import the chart component
-import { Save, RotateCcw, Target, TrendingUp, Calendar, Euro } from 'lucide-react'; // Icons for buttons and goal seeker
+import { Save, RotateCcw, Target, TrendingUp, Calendar, Euro, Percent } from 'lucide-react'; // Icons for buttons and goal seeker + Percent
 import { useTheme } from '../context/ThemeContext'; // Import useTheme
 
 /**
@@ -55,6 +55,40 @@ const calculateRequiredMonthly = (targetValue, years, annualRatePercent) => {
   return requiredMonthly > 0 ? requiredMonthly : null;
 };
 
+/**
+ * Takes nominal growth data and calculates the inflation-adjusted (real) growth data.
+ * Returns an array of series objects for the chart.
+ * @param {Array<{x: number, y: number}>} nominalData - Nominal growth data from calculateGrowth.
+ * @param {number} inflationDecimal - Annual inflation rate (e.g., 0.02 for 2%).
+ * @returns {Array<object>} - Array containing nominal and real growth series.
+ */
+const prepareProjectionSeries = (nominalData, inflationDecimal) => {
+  if (!nominalData || nominalData.length === 0) {
+    return [];
+  }
+
+  const startYear = nominalData[0].x;
+  const realData = nominalData.map(point => {
+    const yearsElapsed = point.x - startYear;
+    // Adjust value: Real = Nominal / (1 + Inflation)^Years
+    const adjustedValue = yearsElapsed === 0 ? point.y : point.y / Math.pow(1 + inflationDecimal, yearsElapsed);
+    return { x: point.x, y: Math.round(adjustedValue) };
+  });
+
+  return [
+    {
+      name: 'Nominal Growth',
+      data: nominalData,
+      type: 'area'
+    },
+    {
+      name: 'Real Growth (Inflation Adj.)',
+      data: realData,
+      type: 'line'
+    }
+  ];
+};
+
 /** Debounce helper hook */
 function useDebouncedCallback(callback, delay) {
   const timeoutRef = useRef(null);
@@ -91,6 +125,7 @@ function GrowthProjectionSection() {
   const [annualRate, setAnnualRate] = useState(7);
   const [years, setYears] = useState(20);
   const [initialInvestment, setInitialInvestment] = useState(0);
+  const [inflationRate, setInflationRate] = useState(2);
 
   // State for scenarios
   const [scenarios, setScenarios] = useState([]);
@@ -105,9 +140,14 @@ function GrowthProjectionSection() {
   // Recalculate live projection whenever DEBOUNCED inputs change
   useEffect(() => {
     const rateDecimal = annualRate / 100;
-    const liveData = calculateGrowth(initialInvestment, monthlyInvestment, years, rateDecimal);
-    setLiveProjectionData([{ name: 'Current Inputs', data: liveData, type: 'area'}]);
-  }, [initialInvestment, monthlyInvestment, annualRate, years]);
+    const inflationDecimal = inflationRate / 100;
+    const nominalData = calculateGrowth(initialInvestment, monthlyInvestment, years, rateDecimal);
+
+    // Prepare series data
+    const projectionSeries = prepareProjectionSeries(nominalData, inflationDecimal);
+
+    setLiveProjectionData(projectionSeries);
+  }, [initialInvestment, monthlyInvestment, annualRate, years, inflationRate]);
 
   // Recalculate goal monthly investment (NO debounce needed here, direct is fine)
   useEffect(() => {
@@ -122,11 +162,13 @@ function GrowthProjectionSection() {
   const debouncedSetMonthlyInvestment = useDebouncedCallback(setMonthlyInvestment, DEBOUNCE_DELAY);
   const debouncedSetAnnualRate = useDebouncedCallback(setAnnualRate, DEBOUNCE_DELAY);
   const debouncedSetYears = useDebouncedCallback(setYears, DEBOUNCE_DELAY);
+  const debouncedSetInflationRate = useDebouncedCallback(setInflationRate, DEBOUNCE_DELAY);
 
   const handleInitialChange = (e) => debouncedSetInitialInvestment(Number(e.target.value));
   const handleMonthlyChange = (e) => debouncedSetMonthlyInvestment(Number(e.target.value));
   const handleRateChange = (e) => debouncedSetAnnualRate(Number(e.target.value));
   const handleYearsChange = (e) => debouncedSetYears(Number(e.target.value));
+  const handleInflationChange = (e) => debouncedSetInflationRate(Number(e.target.value));
 
   // --- Direct Handlers for Goal Seeker Inputs ---
   const handleGoalTargetChange = (e) => setGoalTargetValue(Number(e.target.value));
@@ -246,6 +288,27 @@ function GrowthProjectionSection() {
                  step="1"
                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                />
+             </div>
+             <div className="sm:col-span-2">
+               <label htmlFor="input-inflation" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                 Assumed Annual Inflation (%)
+               </label>
+               <div className="flex items-center space-x-3">
+                 <input
+                   type="range"
+                   id="input-inflation"
+                   name="input-inflation"
+                   min="0"
+                   max="10"
+                   step="0.1"
+                   defaultValue={inflationRate}
+                   onChange={handleInflationChange}
+                   className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-pink-600 dark:accent-pink-400"
+                 />
+                 <span id="inflation-value" className="text-sm font-semibold text-pink-700 dark:text-pink-400 w-12 text-right">
+                   {inflationRate.toFixed(1)}%
+                 </span>
+               </div>
              </div>
           </div>
           {/* Action Buttons */}
