@@ -1,6 +1,7 @@
-# React Investment Website
+# React Investment Plan Visualizer
 
-A single-page application built with React and Vite to visualize an investment strategy, including portfolio details, growth projections, and other relevant financial information.
+A single-page application built with React and Vite to visualize a personal long-term investment strategy, based on the original static HTML version.
+It includes portfolio details, interactive growth projections, tax considerations, and implementation examples.
 
 ## Table of Contents
 
@@ -11,28 +12,29 @@ A single-page application built with React and Vite to visualize an investment s
 *   [Running the Development Server](#running-the-development-server)
 *   [Building for Production](#building-for-production)
 *   [Project Structure](#project-structure)
-*   [Key Components & State](#key-components--state)
+*   [Key Components & State Management](#key-components--state-management)
 *   [Styling](#styling)
-*   [Contributing](#contributing)
-*   [Changelog](#changelog)
-*   [License](#license)
 *   [Future Enhancements / TODOs](#future-enhancements--todos)
 
 ## Features
 
-*   **Component-Based Structure:** Organized into reusable React components for different sections (Overview, Portfolio, Growth Projection, etc.).
-*   **Interactive Growth Projection:** Allows users to adjust monthly investment, annual rate, and investment duration to see projected growth visualized in a chart (using ApexCharts).
+*   **Component-Based Structure:** Organized into reusable React components for different sections (Overview, Core Portfolio, China Satellite, Tax, Implementation, etc.).
+*   **Interactive Core Portfolio Allocation:** Donut chart visualizing core ETF allocation, with clickable slices highlighting corresponding implementation examples.
+*   **Interactive Growth Projection:** Allows users to adjust monthly investment, assumed annual rate, and time horizon to see projected growth visualized in an area chart.
+*   **Tax Calculator:** Simple calculator for the German *Sparer-Pauschbetrag* (tax-free allowance).
 *   **Dark Mode:** Supports toggling between light and dark themes, with preferences saved in local storage.
 *   **Responsive Design:** Utilizes Tailwind CSS for a mobile-first, responsive layout.
+*   **Scrollspy Navigation:** Navigation links automatically highlight based on the currently viewed section.
 *   **Animations:** Uses AOS (Animate On Scroll) library for subtle entrance animations.
 
 ## Tech Stack
 
-*   **Framework:** React
+*   **Framework:** React 18+
 *   **Build Tool:** Vite
-*   **Styling:** Tailwind CSS, CSS Modules (`components.css`, `base.css`)
+*   **Styling:** Tailwind CSS
 *   **Charting:** ApexCharts (via `react-apexcharts`)
 *   **Animations:** AOS (Animate On Scroll)
+*   **Icons:** Lucide Icons (via `lucide-react`)
 *   **Language:** JavaScript (JSX)
 
 ## Prerequisites
@@ -77,60 +79,58 @@ npm run build
 yarn build
 ```
 
-The output files will be generated in the `dist` directory.
+The output files will be generated in the `dist` directory. You can preview the production build locally using:
+
+```bash
+npm run preview
+# or
+yarn preview
+```
 
 ## Project Structure
 
 ```
 react-investment-app/
-├── public/             # Static assets
-├── src/                # Source code
-│   ├── assets/         # Images, logos, etc.
-│   ├── components/     # React components (Navbar, Footer, Sections...)
-│   ├── App.jsx         # Main application component, state management
-│   ├── base.css        # Base styles (Tailwind directives)
-│   ├── components.css  # Custom component styles
-│   └── main.jsx        # Entry point, renders App
+├── public/             # Static assets (favicon, etc.)
+├── src/
+│   ├── assets/         # Images, logos (if any)
+│   ├── components/     # React components (Navbar, Footer, Sections, Charts, etc.)
+│   ├── App.jsx         # Main application component, root state management
+│   ├── base.css        # Base styles (Tailwind directives, global styles)
+│   ├── components.css  # Custom component-level styles
+│   └── main.jsx        # Application entry point (renders App)
 ├── .eslintrc.cjs       # ESLint configuration
 ├── .gitignore          # Git ignore rules
-├── index.html          # HTML entry point
+├── index.html          # HTML template entry point
 ├── package.json        # Project metadata and dependencies
 ├── postcss.config.js   # PostCSS configuration (for Tailwind)
+├── tailwind.config.js  # Tailwind CSS configuration
 ├── README.md           # This file
-└── tailwind.config.js  # Tailwind CSS configuration
 └── vite.config.js      # Vite configuration
 ```
 
-## Key Components & State
+## Key Components & State Management
 
-*   **`App.jsx`**: The root component. Manages global state like `isDarkMode` and the core state for the growth projection calculator (`monthlyInvestment`, `annualRate`, `years`). It passes state and setters down to relevant child components.
-*   **Section Components (`src/components/*Section.jsx`)**: Represent the main content blocks of the page (e.g., `OverviewSection`, `CorePortfolioSection`, `GrowthProjectionSection`). They receive necessary props from `App.jsx`.
-*   **`GrowthProjectionSection.jsx`**: Contains the user interface (inputs/sliders) for adjusting growth parameters and renders the `GrowthProjectionChart`.
-*   **`GrowthProjectionChart.jsx`**: Displays the projection data using ApexCharts. Receives calculation parameters as props.
-*   **`Navbar.jsx`**: Application header, includes the dark mode toggle.
-*   **`Footer.jsx`**: Application footer.
+*   **`App.jsx`**: The root component. Manages global state like `isDarkMode` and the `highlightedCoreIndex` used for interaction between the portfolio chart and implementation cards. It renders the `Navbar`, `Footer`, and all section components, passing down necessary props (state and callbacks).
+*   **Section Components (`src/components/*Section.jsx`)**: Represent the main content blocks (e.g., `OverviewSection`, `CorePortfolioSection`, `GrowthProjectionSection`, `TaxSection`). They receive props like `isDarkMode` or state related to interactions from `App.jsx`.
+*   **Chart Components (`CoreAllocationChart.jsx`, `GrowthProjectionChart.jsx`)**: Render the ApexCharts visualizations. They receive data and configuration props (like `isDarkMode` or input values) and may call callback functions passed from parent components (e.g., `onSliceSelect`).
+*   **Interactive Components (`GrowthProjectionSection.jsx`, `TaxCalculator.jsx`)**: Manage their own local state related to user inputs (e.g., investment amount, estimated gains).
+*   **`ImplementationCard.jsx`**: A reusable component to display individual investment examples. Receives data and an `isHighlighted` prop.
+*   **`Navbar.jsx`**: Application header. Manages mobile menu state, implements scrollspy logic, and includes the dark mode toggle.
+*   **`Footer.jsx`**: Application footer with dynamic year.
 
 ## Styling
 
-*   **Tailwind CSS:** Used for utility-first styling. Configuration is in `tailwind.config.js`. Base styles and Tailwind directives are included in `src/base.css`.
-*   **Custom CSS:** Component-specific or global custom styles are located in `src/components.css`.
-
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Changelog
-
-View the [CHANGELOG.md](CHANGELOG.md) to see the history of changes to the project.
-
-## License
-
-This project is licensed under the [INSERT LICENSE NAME HERE] License - see the LICENSE.md file for details (You'll need to create this file).
+*   **Tailwind CSS:** Primary styling method using utility classes. Configuration is in `tailwind.config.js`. Base styles and Tailwind directives are included in `src/base.css`.
+*   **Custom CSS:** Component-specific styles (e.g., range input styling, chart text adjustments, card highlighting) are located in `src/components.css`.
 
 ## Future Enhancements / TODOs
 
-*   Implement the content for `GrowthProjectionSection.jsx`.
-*   Re-enable the calculation and rendering logic in `GrowthProjectionChart.jsx` after debugging.
-*   Add comprehensive JSDoc comments to components and functions.
-*   Implement unit and integration tests.
-*   Refine error handling and edge cases for the growth calculation.
+*   Add PropTypes or migrate to TypeScript for better type safety.
+*   Perform a more thorough accessibility (A11y) audit.
+*   Add unit tests (e.g., for `calculateGrowth`, `TaxCalculator`) and potentially component/integration tests.
+*   Refine the logic for clearing the highlighted implementation card (e.g., click outside).
+*   Consider using React Context for managing `isDarkMode` state instead of prop drilling if the application grows significantly.
+*   Make the "Last Reviewed" date in `OverviewSection` dynamic or easily configurable.
+*   Fetch `RevisionHistory` data dynamically if needed.
+*   Add a `LICENSE` file.

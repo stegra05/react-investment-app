@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Migrated from original base.css */
+body {
+  font-family: 'Inter', sans-serif;
+  scroll-behavior: smooth;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ensure elements are hidden initially for AOS */
+[data-aos] {
+   opacity: 0;
+   transition-property: transform, opacity;
+ } 
