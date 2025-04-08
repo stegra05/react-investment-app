@@ -6,14 +6,30 @@ import RiskGauge from './RiskGauge'; // Import the RiskGauge component
 import { appConfig } from '../data/appConfig'; // Import config
 
 /**
+ * Calculates a risk level string based on the satellite allocation percentage.
+ * @param {number} satellitePercentage - The percentage of the portfolio allocated to satellite investments.
+ * @returns {string} The calculated risk level (e.g., "Low", "Moderate", "High").
+ */
+const calculateRiskLevel = (satellitePercentage) => {
+  if (satellitePercentage <= 10) return "Low";
+  if (satellitePercentage <= 25) return "Low-Moderate";
+  if (satellitePercentage <= 40) return "Moderate";
+  if (satellitePercentage <= 60) return "Moderate-High";
+  return "High";
+};
+
+/**
  * Renders the Overview section.
- * Uses PlanContext for investment amounts.
+ * Uses PlanContext for investment amounts and calculates dynamic risk.
  */
 function OverviewSection() {
   const { totalInvestment, coreAmount, satelliteAmount } = usePlan(); // Use context hook
 
   const corePercentage = totalInvestment > 0 ? Math.round((coreAmount / totalInvestment) * 100) : 0;
-  const satellitePercentage = totalInvestment > 0 ? 100 - corePercentage : 0; // Ensure it adds up
+  const satellitePercentage = totalInvestment > 0 ? Math.max(0, 100 - corePercentage) : 0; // Ensure satellite isn't negative due to rounding
+
+  // Calculate dynamic risk level
+  const riskLevel = calculateRiskLevel(satellitePercentage);
 
   return (
     <section id="overview" className="mb-16 scroll-mt-16">
@@ -47,7 +63,7 @@ function OverviewSection() {
           </div>
           <div className="text-center mt-auto pt-2">
             <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Risk Profile:</span>
-            <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 ml-1">Moderate-High</span>
+            <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 ml-1">{riskLevel}</span>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700 text-center flex flex-col justify-center items-center" data-aos="fade-up" data-aos-delay="400">
@@ -85,7 +101,7 @@ function OverviewSection() {
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center">
             <Scale size={14} className="mr-1.5" aria-hidden="true"/>Risk Profile
           </h3>
-          <RiskGauge level="Moderate-High" />
+          <RiskGauge level={riskLevel} />
         </div>
       </div>
     </section>

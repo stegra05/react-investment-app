@@ -7,9 +7,10 @@ import { useTheme } from '../context/ThemeContext'; // Import useTheme
  * Generates chart options based on theme.
  * @param {boolean} isDark
  * @param {Array} seriesData - The series data to determine types (area/line)
+ * @param {object} [annotations] - Optional annotations configuration
  * @returns {object} ApexCharts options object
  */
-const getGrowthChartOptions = (isDark, seriesData = []) => {
+const getGrowthChartOptions = (isDark, seriesData = [], annotations = {}) => {
   const colors = {
     // Define a broader palette for multiple lines + area
     palette: isDark
@@ -89,23 +90,24 @@ const getGrowthChartOptions = (isDark, seriesData = []) => {
         sizeOffset: 4
       }
     },
-    grid: { borderColor: colors.gridColor, strokeDashArray: 4, padding: { left: 10, right: 10 } }
+    grid: { borderColor: colors.gridColor, strokeDashArray: 4, padding: { left: 10, right: 10 } },
+    annotations: annotations // Add annotations here
   };
 };
 
 /**
  * Renders the Growth Projection area/line chart.
- * @param {{seriesData: Array}} props
+ * @param {{seriesData: Array, annotations: object}} props
  * Uses ThemeContext.
  */
-function GrowthProjectionChart({ seriesData }) {
+function GrowthProjectionChart({ seriesData, annotations }) {
   const { isDarkMode } = useTheme(); // Use context hook
-  const [chartOptions, setChartOptions] = useState(() => getGrowthChartOptions(isDarkMode, seriesData));
+  const [chartOptions, setChartOptions] = useState(() => getGrowthChartOptions(isDarkMode, seriesData, annotations));
 
   useEffect(() => {
-    // Update options when theme or series data structure (types) might change
-    setChartOptions(getGrowthChartOptions(isDarkMode, seriesData));
-  }, [isDarkMode, seriesData]);
+    // Update options when theme, series data structure, or annotations change
+    setChartOptions(getGrowthChartOptions(isDarkMode, seriesData, annotations));
+  }, [isDarkMode, seriesData, annotations]);
 
   // Create dynamic summary for aria-label
   let ariaLabel = "Growth projection chart.";
@@ -149,6 +151,7 @@ GrowthProjectionChart.propTypes = {
     type: PropTypes.oneOf(['line', 'area']).isRequired,
     // Might include 'inputs' for saved scenarios, but not strictly needed for rendering
   })).isRequired,
+  annotations: PropTypes.object, // Annotations are optional
 };
 
 export default GrowthProjectionChart; 

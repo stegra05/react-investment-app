@@ -1,23 +1,45 @@
 /**
- * Calculates the projected growth data.
+ * Calculates the projected growth data, incorporating events.
  * @param {number} initial - Initial balance (usually 0)
- * @param {number} monthly - Monthly investment amount
+ * @param {number} monthly - Default monthly investment amount
  * @param {number} years - Investment duration in years
  * @param {number} rate - Assumed annual rate of return (e.g., 0.07 for 7%)
+ * @param {Array<object>} [events=[]] - Array of event objects {id, type, year, amount?, endYear?}
  * @returns {Array<{x: number, y: number}>} - Array of data points for the chart
  */
-export const calculateGrowth = (initial, monthly, years, rate) => {
+export const calculateGrowth = (initial, monthly, years, rate, events = []) => {
   let balance = initial;
   const monthlyRate = rate / 12;
   const currentFullYear = new Date().getFullYear();
   const data = [{ x: currentFullYear, y: Math.round(balance) }]; // Start with initial balance at current year
   let currentYear = currentFullYear;
 
+  // Pre-process events for quick lookup
+  const pauseEvents = events.filter(e => e.type === 'pause');
+  const lumpSumEvents = events.filter(e => e.type === 'lumpSum');
+
   for (let year = 1; year <= years; year++) {
-    for (let month = 1; month <= 12; month++) {
-      balance = balance * (1 + monthlyRate) + monthly;
-    }
     currentYear++;
+    let currentMonthly = monthly;
+
+    // Check for pause event covering this year
+    const isPaused = pauseEvents.some(e => currentYear >= e.year && currentYear <= e.endYear);
+    if (isPaused) {
+      currentMonthly = 0;
+    }
+
+    // Monthly compounding loop
+    for (let month = 1; month <= 12; month++) {
+      balance = balance * (1 + monthlyRate) + currentMonthly;
+    }
+
+    // Check for lump sum events happening *at the end* of this year
+    lumpSumEvents.forEach(e => {
+        if (e.year === currentYear) {
+            balance += e.amount;
+        }
+    });
+
     data.push({ x: currentYear, y: Math.round(balance) });
   }
   return data;
