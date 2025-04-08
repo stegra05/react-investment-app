@@ -1,7 +1,19 @@
 # React Investment Plan Visualizer
 
-A single-page application built with React and Vite to visualize a personal long-term investment strategy, based on the original static HTML version.
-It includes portfolio details, interactive growth projections, tax considerations, and implementation examples.
+This project is a single-page application built with React and Vite, designed to visualize a specific long-term personal investment strategy. It serves as a dynamic and interactive representation of a plan focused on achieving capital growth over a 20+ year horizon through controlled risk and consistent monthly investments (€600).
+
+The application provides users with:
+
+*   **A Detailed Overview:** A snapshot of the overall plan, including the core vs. satellite allocation (€500 Core, €100 Satellite), the long-term time horizon, the moderate-high risk profile, and the planned review schedule.
+*   **Core Portfolio Breakdown:** Insights into the €500/month core investment strategy, focusing on diversification through Global Developed, European, and Emerging Market ETFs. It features an interactive donut chart where selecting a slice highlights corresponding implementation details and rationale.
+*   **Interactive Growth Scenarios:** A projection tool using an area chart that allows users to adjust parameters like monthly investment amount, expected annual return rate, and investment duration (years) to visualize potential long-term growth outcomes.
+*   **China Satellite Strategy:** Information on the dedicated €100/month satellite investment focused on the Chinese market, outlining different allocation approaches (Balanced, High-Risk, Combined).
+*   **German Tax Considerations:** Key information relevant to German investors, including the *Kapitalertragssteuer* (flat tax on capital gains) and the *Sparer-Pauschbetrag* (annual tax-free allowance), along with a simple calculator for the allowance.
+*   **Practical Implementation Guide:** Concrete examples of ETFs and potentially stocks that align with the strategy, including details like ISIN, TER (Total Expense Ratio), and the rationale for their inclusion. It also offers guidance on selecting a suitable low-cost broker in Germany, highlighting important factors like *Sparpläne* (savings plans).
+*   **Portfolio Tracking Advice:** Recommendations on how to monitor the investment portfolio effectively using broker interfaces, dedicated apps, or spreadsheets.
+*   **Supporting Sections:** Additional context provided through a Long-Term View and a Revision History section (content may vary).
+
+Built with modern web technologies, the application features a responsive design using Tailwind CSS, light/dark mode toggle, scrollspy navigation for easy section hopping, and subtle entrance animations via AOS.
 
 ## Table of Contents
 

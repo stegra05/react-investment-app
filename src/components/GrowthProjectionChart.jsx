@@ -26,12 +26,12 @@ const calculateGrowth = (initial, monthly, years, rate) => {
 };
 
 /**
- * Generates chart options based on theme and data.
+ * Generates chart options based on theme.
+ * NOTE: Does not include the 'series' key anymore.
  * @param {boolean} isDark
- * @param {Array<{x: number, y: number}>} growthData - The calculated data series
  * @returns {object} ApexCharts options object
  */
-const getGrowthChartOptions = (isDark, growthData) => {
+const getGrowthChartOptions = (isDark) => {
   const colors = {
     growthArea: isDark ? ['#a78bfa'] : ['#8b5cf6'], // Violet variants
     textColor: isDark ? '#d1d5db' : '#374151', // gray-300 / gray-700
@@ -49,7 +49,6 @@ const getGrowthChartOptions = (isDark, growthData) => {
       toolbar: { show: false },
       background: 'transparent'
     },
-    series: [{ name: 'Projected Value', data: growthData }],
     colors: colors.growthArea,
     dataLabels: { enabled: false },
     stroke: { curve: 'smooth', width: 2 },
@@ -76,7 +75,7 @@ const getGrowthChartOptions = (isDark, growthData) => {
       x: { formatter: (value) => `End of Year: ${Math.round(value)}` },
       y: {
         formatter: (value) => "€" + value.toLocaleString('de-DE'),
-        title: { formatter: (seriesName) => seriesName + ':' }
+        title: { formatter: (seriesName) => seriesName ? seriesName + ':' : '' }
       }
     },
     grid: { borderColor: colors.gridColor, strokeDashArray: 4, padding: { left: 10, right: 10 } }
@@ -89,27 +88,28 @@ const getGrowthChartOptions = (isDark, growthData) => {
  */
 function GrowthProjectionChart({ monthlyInvestment, annualRate, years, isDarkMode }) {
   const [chartData, setChartData] = useState([]);
-  const [chartOptions, setChartOptions] = useState({});
+  // Initialize options state with default options based on initial theme
+  const [chartOptions, setChartOptions] = useState(() => getGrowthChartOptions(isDarkMode));
 
   useEffect(() => {
     // Recalculate data when inputs change
     const rateDecimal = annualRate / 100;
     const newGrowthData = calculateGrowth(0, monthlyInvestment, years, rateDecimal);
-    setChartData(newGrowthData);
+    // Prepare series data in the format ApexCharts expects
+    setChartData([{ name: 'Projected Value', data: newGrowthData }]);
   }, [monthlyInvestment, annualRate, years]);
 
   useEffect(() => {
-    // Update options when data or theme changes
-    setChartOptions(getGrowthChartOptions(isDarkMode, chartData));
-  }, [isDarkMode, chartData]);
+    // Update options only when theme changes
+    setChartOptions(getGrowthChartOptions(isDarkMode));
+  }, [isDarkMode]);
 
   return (
     <div id="growthChartContainer">
-      {/* Use a key to force re-render if options object identity changes significantly, prevents stale chart issues */}
       <Chart
-        key={isDarkMode ? 'dark' : 'light'} // Simple key based on theme
+        key={isDarkMode ? 'dark' : 'light'}
         options={chartOptions}
-        series={chartOptions.series} // Pass series from options
+        series={chartData} // Pass chartData state directly to series prop
         type="area"
         height={350}
       />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, AlertTriangle, ShieldCheck, LineChart, TrendingUp, Zap, Scales, PiggyBank, MapPin, ExternalLink } from 'lucide-react'; // Added more specific icons
+import { ArrowRight, AlertTriangle, ShieldCheck, LineChart, TrendingUp, Zap, Scale, PiggyBank, MapPin, ExternalLink } from 'lucide-react'; // Added more specific icons
 
 /**
  * Renders the China Satellite section.
@@ -39,7 +39,7 @@ function ChinaSatelliteSection() {
               <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 border-b border-red-200 dark:border-red-700 pb-1">Risks</h4>
               <div className="space-y-3">
                 <p className="flex items-start text-sm text-red-800 dark:text-red-300">
-                  <Scales size={16} className="mr-2 mt-0.5 flex-shrink-0 text-red-600 dark:text-red-400" />
+                  <Scale size={16} className="mr-2 mt-0.5 flex-shrink-0 text-red-600 dark:text-red-400" />
                   <span>Regulatory & Political Changes</span>
                 </p>
                 <p className="flex items-start text-sm text-red-800 dark:text-red-300">
