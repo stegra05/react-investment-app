@@ -2,6 +2,22 @@
 
 A single-page application built with React and Vite to visualize an investment strategy, including portfolio details, growth projections, and other relevant financial information.
 
+## Table of Contents
+
+*   [Features](#features)
+*   [Tech Stack](#tech-stack)
+*   [Prerequisites](#prerequisites)
+*   [Setup and Installation](#setup-and-installation)
+*   [Running the Development Server](#running-the-development-server)
+*   [Building for Production](#building-for-production)
+*   [Project Structure](#project-structure)
+*   [Key Components & State](#key-components--state)
+*   [Styling](#styling)
+*   [Contributing](#contributing)
+*   [Changelog](#changelog)
+*   [License](#license)
+*   [Future Enhancements / TODOs](#future-enhancements--todos)
+
 ## Features
 
 *   **Component-Based Structure:** Organized into reusable React components for different sections (Overview, Portfolio, Growth Projection, etc.).
@@ -98,6 +114,18 @@ react-investment-app/
 
 *   **Tailwind CSS:** Used for utility-first styling. Configuration is in `tailwind.config.js`. Base styles and Tailwind directives are included in `src/base.css`.
 *   **Custom CSS:** Component-specific or global custom styles are located in `src/components.css`.
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
+
+## Changelog
+
+View the [CHANGELOG.md](CHANGELOG.md) to see the history of changes to the project.
+
+## License
+
+This project is licensed under the [INSERT LICENSE NAME HERE] License - see the LICENSE.md file for details (You'll need to create this file).
 
 ## Future Enhancements / TODOs
 
