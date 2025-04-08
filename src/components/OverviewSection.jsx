@@ -1,12 +1,17 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { CalendarDays, Clock, TrendingUp } from 'lucide-react';
+import { usePlan } from '../context/PlanContext'; // Import usePlan hook
 
 /**
  * Renders the Overview section.
+ * Uses PlanContext for investment amounts.
  */
 function OverviewSection() {
-  // TODO: Make "Last Reviewed" date dynamic or easily updatable
-  const lastReviewedDate = "June 2024"; // Example date
+  const { totalInvestment, coreAmount, satelliteAmount } = usePlan(); // Use context hook
+
+  const corePercentage = totalInvestment > 0 ? Math.round((coreAmount / totalInvestment) * 100) : 0;
+  const satellitePercentage = totalInvestment > 0 ? 100 - corePercentage : 0; // Ensure it adds up
 
   return (
     <section id="overview" className="mb-16 scroll-mt-16">
@@ -14,21 +19,29 @@ function OverviewSection() {
         Your Long-Term Investment Plan
       </h1>
       <p className="text-xs text-gray-500 dark:text-gray-400 mb-2" data-aos="fade-up" data-aos-delay="50">
-        Last Reviewed: <span className="font-semibold">{lastReviewedDate}</span>
+        Date: <span className="font-semibold">{new Date().toLocaleDateString('en-CA')}</span>
       </p>
       <p className="text-lg text-gray-600 dark:text-gray-400 mb-8" data-aos="fade-up" data-aos-delay="100">
-        A structured approach aiming for capital growth over 20+ years with controlled risk, investing €600 per month.
+        A structured approach aiming for capital growth over 20+ years with controlled risk, investing €{totalInvestment} per month.
       </p>
       <div id="overview-dashboard" className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
         <div className="col-span-2 bg-white dark:bg-gray-800 p-4 rounded-lg shadow border border-gray-200 dark:border-gray-700 flex flex-col justify-start" data-aos="fade-up" data-aos-delay="200">
-          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3 text-center">Plan Snapshot (€600/month)</h3>
+          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3 text-center">Plan Snapshot (€{totalInvestment}/month)</h3>
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-2 overflow-hidden flex">
-            <div className="bg-indigo-600 dark:bg-indigo-500 h-4 text-xs font-medium text-indigo-100 text-center p-0.5 leading-none rounded-l-full" style={{ width: '83%' }} title="Core: €500 (83%)"></div>
-            <div className="bg-purple-500 dark:bg-purple-400 h-4 text-xs font-medium text-purple-100 text-center p-0.5 leading-none rounded-r-full" style={{ width: '17%' }} title="Satellite: €100 (17%)"></div>
+            <div 
+              className="bg-indigo-600 dark:bg-indigo-500 h-4 text-xs font-medium text-indigo-100 text-center p-0.5 leading-none transition-all duration-300 ease-in-out"
+              style={{ width: `${corePercentage}%` }}
+              title={`Core: €${coreAmount} (${corePercentage}%)`}>
+            </div>
+            <div 
+              className="bg-purple-500 dark:bg-purple-400 h-4 text-xs font-medium text-purple-100 text-center p-0.5 leading-none transition-all duration-300 ease-in-out"
+              style={{ width: `${satellitePercentage}%` }}
+              title={`Satellite: €${satelliteAmount} (${satellitePercentage}%)`}>
+            </div>
           </div>
           <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 px-1 mb-3">
-            <span>Core: €500 (83%)</span>
-            <span>Satellite: €100 (17%)</span>
+            <span>Core: €{coreAmount} ({corePercentage}%)</span>
+            <span>Satellite: €{satelliteAmount} ({satellitePercentage}%)</span>
           </div>
           <div className="text-center mt-auto pt-2">
             <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Risk Profile:</span>

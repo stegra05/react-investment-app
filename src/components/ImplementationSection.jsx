@@ -1,12 +1,14 @@
 import React from 'react';
+import PropTypes from 'prop-types'; // Import PropTypes
 import { ExternalLink, Globe, Euro, LineChart, Landmark, HandCoins, Rocket, Combine, Info } from 'lucide-react'; // Relevant icons
 import ImplementationCard from './ImplementationCard'; // Import the reusable card
+import { usePlan } from '../context/PlanContext'; // Import usePlan
 
-// Data for the cards
-const coreCardsData = [
+// Base data for the cards (without amounts in title)
+const baseCoreCardsData = [
   {
     id: 'impl-card-global',
-    title: '1. Global Dev. ETF (€300)',
+    baseTitle: '1. Global Dev. ETF',
     icon: 'globe',
     iconColor: 'indigo',
     link: 'https://www.justetf.com/de/etf-profile.html?isin=IE00B4L5Y983',
@@ -18,7 +20,7 @@ const coreCardsData = [
   },
   {
     id: 'impl-card-europe',
-    title: '2. Europe ETF (€100)',
+    baseTitle: '2. Europe ETF',
     icon: 'euro',
     iconColor: 'indigo',
     link: 'https://www.justetf.com/de/etf-profile.html?isin=DE0002635307',
@@ -30,7 +32,7 @@ const coreCardsData = [
   },
   {
     id: 'impl-card-em',
-    title: '3. EM ETF (€100)',
+    baseTitle: '3. EM ETF',
     icon: 'linechart',
     iconColor: 'indigo',
     link: 'https://www.justetf.com/de/etf-profile.html?isin=IE00BKM4GZ66',
@@ -113,10 +115,25 @@ const chinaCardsData = [
 
 /**
  * Renders the Implementation Guide section.
- * @param {{ highlightedCoreIndex: number | null }} props
+ * Uses PlanContext. Receives highlight props from App.
  */
-function ImplementationSection({ highlightedCoreIndex }) {
-  // NOTE: Card highlighting logic and reusable component will be added in Phase 3.
+function ImplementationSection({ 
+  highlightedCoreIndex, 
+  highlightedRationale, 
+}) {
+  const { coreAmount, coreAllocations, satelliteAmount } = usePlan(); // Use context hook
+
+  // Generate dynamic core card data with calculated amounts in titles
+  const coreCardsDataWithAmounts = baseCoreCardsData.map((card, index) => {
+    const allocation = coreAllocations[index]; // Assumes order matches
+    const amount = coreAmount > 0 && allocation ? (allocation.value / 100 * coreAmount).toFixed(0) : 0;
+    return {
+      ...card,
+      title: `${card.baseTitle} (€${amount})`
+    };
+  });
+
+  const totalInvestment = coreAmount + satelliteAmount;
 
   return (
     <section id="implementation" className="mb-16 scroll-mt-16" data-aos="fade-up">
@@ -124,19 +141,20 @@ function ImplementationSection({ highlightedCoreIndex }) {
         Practical Implementation Guide
       </h2>
       <p className="text-gray-600 dark:text-gray-400 mb-6">
-        Example ETFs and stocks for setting up your monthly investment plan (€600 total).
+        Example ETFs and stocks for setting up your monthly investment plan (€{totalInvestment} total).
       </p>
 
       <div className="space-y-8">
         {/* Core Portfolio ETFs */}
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-indigo-700 dark:text-indigo-400">Core Portfolio (€500/month - ETFs)</h3>
+          <h3 className="text-xl font-semibold mb-4 text-indigo-700 dark:text-indigo-400">Core Portfolio (€{coreAmount}/month - ETFs)</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {coreCardsData.map((card, index) => (
+            {coreCardsDataWithAmounts.map((card, index) => (
               <ImplementationCard
                 key={card.id}
                 cardData={card}
                 isHighlighted={index === highlightedCoreIndex} // Highlight based on prop
+                rationale={index === highlightedCoreIndex ? highlightedRationale : null} // Pass rationale only if highlighted
               />
             ))}
           </div>
@@ -144,7 +162,7 @@ function ImplementationSection({ highlightedCoreIndex }) {
 
         {/* Optional Additions */}
         <div>
-          <h3 className="text-xl font-semibold mb-4 mt-6 text-indigo-700 dark:text-indigo-400">Optional Additions (within total €600 plan)</h3>
+          <h3 className="text-xl font-semibold mb-4 mt-6 text-indigo-700 dark:text-indigo-400">Optional Additions (within total €{totalInvestment} plan)</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
              {optionalCardsData.map((card) => (
                <ImplementationCard
@@ -154,18 +172,19 @@ function ImplementationSection({ highlightedCoreIndex }) {
                />
              ))}
           </div>
-           <p className="text-sm text-gray-600 dark:text-gray-400 mt-4">Note: The core €500 is allocated to the three ETFs above. The optional €100 can be allocated to Bonds/Stocks instead of or alongside the China satellite, depending on preference.</p>
+           <p className="text-sm text-gray-600 dark:text-gray-400 mt-4">Note: The core €{coreAmount} is allocated to the {coreCardsDataWithAmounts.length} ETFs above. The optional €{satelliteAmount} can be allocated to Bonds/Stocks instead of or alongside the China satellite, depending on preference.</p>
         </div>
 
         {/* China Satellite */}
         <div id="impl-china">
-          <h3 className="text-xl font-semibold mb-4 text-rose-700 dark:text-rose-400">China Satellite (€100/month)</h3>
+          <h3 className="text-xl font-semibold mb-4 text-rose-700 dark:text-rose-400">China Satellite (€{satelliteAmount}/month)</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
              {chinaCardsData.map((card) => (
                <ImplementationCard
                  key={card.id}
                  cardData={card}
                  isHighlighted={false} // China cards are not highlighted by core chart
+                 // TODO: Update amounts in China card titles if satelliteAmount changes?
                />
              ))}
           </div>
@@ -192,5 +211,11 @@ function ImplementationSection({ highlightedCoreIndex }) {
     </section>
   );
 }
+
+// Update propTypes definition
+ImplementationSection.propTypes = {
+  highlightedCoreIndex: PropTypes.number, // Can be null
+  highlightedRationale: PropTypes.string, // Can be null
+};
 
 export default ImplementationSection; 

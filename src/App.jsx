@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import PropTypes from 'prop-types';
+import { useState, useEffect, useCallback, useRef } from 'react'
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import './components.css';
@@ -17,6 +18,11 @@ import RevisionHistorySection from './components/RevisionHistorySection';
 // Interactive Sections
 import CorePortfolioSection from './components/CorePortfolioSection';
 import GrowthProjectionSection from './components/GrowthProjectionSection';
+import ConfigurationSection from './components/ConfigurationSection';
+
+// Import Context Providers and Hooks
+import { ThemeProvider } from './context/ThemeContext';
+import { PlanProvider } from './context/PlanContext';
 
 // Data for highlighting interaction
 const coreRationales = {
@@ -25,32 +31,26 @@ const coreRationales = {
   2: "Access to faster-growing emerging economies. Higher potential returns, balanced by higher risk, within a diversified core.",
 };
 
-function App() {
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) return savedTheme === 'dark';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
+function AppContent() {
+  // Initialize AOS effect
+  useEffect(() => {
+    AOS.init({ once: true, duration: 600, offset: 50 });
+  }, []);
 
   // State for interaction between Core Portfolio Chart and Implementation Cards
   const [highlightedCoreIndex, setHighlightedCoreIndex] = useState(null);
   const [highlightedRationale, setHighlightedRationale] = useState(null);
 
-  // Update theme effect
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDarkMode]);
-
-  // Initialize AOS effect
-  useEffect(() => {
-    AOS.init({ once: true, duration: 600, offset: 50 });
-  }, []);
+  // State for plan configuration
+  const [totalInvestment, setTotalInvestment] = useState(600);
+  const [coreAmount, setCoreAmount] = useState(500);
+  // Ensure satelliteAmount is derived correctly
+  const satelliteAmount = totalInvestment - coreAmount;
+  const [coreAllocations, setCoreAllocations] = useState([
+    { name: 'Global Dev.', value: 60 },
+    { name: 'Europe', value: 20 },
+    { name: 'EM', value: 20 },
+  ]);
 
   // Update rationale when highlighted index changes
   useEffect(() => {
@@ -61,41 +61,49 @@ function App() {
     }
   }, [highlightedCoreIndex]);
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(prevMode => !prevMode);
-  };
-
   // Callback for the Core Allocation Chart slice selection
   const handleCoreSliceSelect = (index) => {
     // Allow deselecting by clicking the same slice again (optional)
-    // setHighlightedCoreIndex(prevIndex => prevIndex === index ? null : index);
-    setHighlightedCoreIndex(index); // Simple set
-  };
-
-  // Function to clear highlight (e.g., passed to ImplementationSection for click outside)
-  const clearCoreHighlight = () => {
-      setHighlightedCoreIndex(null);
+    setHighlightedCoreIndex(prevIndex => prevIndex === index ? null : index);
   };
 
   // TODO: Pass highlightedCoreIndex to ImplementationSection
-  // TODO: Pass clearCoreHighlight potentially
   // TODO: Update TaxSection to include TaxCalculator component
 
   return (
     <div className="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 min-h-screen flex flex-col">
-      <Navbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+      <Navbar />
       <main className="flex-grow">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-          <OverviewSection />
+          <OverviewSection
+            totalInvestment={totalInvestment}
+            coreAmount={coreAmount}
+            satelliteAmount={satelliteAmount}
+          />
+          <ConfigurationSection
+            totalInvestment={totalInvestment}
+            setTotalInvestment={setTotalInvestment}
+            coreAmount={coreAmount}
+            setCoreAmount={setCoreAmount}
+            coreAllocations={coreAllocations}
+            setCoreAllocations={setCoreAllocations}
+          />
           <CorePortfolioSection
-            isDarkMode={isDarkMode}
             onSliceSelect={handleCoreSliceSelect}
             highlightedRationale={highlightedRationale}
+            coreAmount={coreAmount}
+            coreAllocations={coreAllocations}
           />
-          <GrowthProjectionSection isDarkMode={isDarkMode} />
+          <GrowthProjectionSection />
           <ChinaSatelliteSection />
           <TaxSection />
-          <ImplementationSection highlightedCoreIndex={highlightedCoreIndex} />
+          <ImplementationSection
+            highlightedCoreIndex={highlightedCoreIndex}
+            highlightedRationale={highlightedRationale}
+            coreAmount={coreAmount}
+            coreAllocations={coreAllocations}
+            satelliteAmount={satelliteAmount}
+          />
           <TrackingSection />
           <LongTermViewSection />
           <RevisionHistorySection />
@@ -103,6 +111,17 @@ function App() {
       </main>
       <Footer />
     </div>
+  );
+}
+
+// New Root App component to wrap providers
+function App() {
+  return (
+    <ThemeProvider>
+      <PlanProvider>
+        <AppContent />
+      </PlanProvider>
+    </ThemeProvider>
   );
 }
 

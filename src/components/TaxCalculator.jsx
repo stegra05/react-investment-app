@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 // Helper function to format currency in German locale
 function formatCurrencyDE(amount) {

@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { Menu, X, Sun, Moon, LineChart } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext'; // Import useTheme hook
 
 /**
  * Renders the navigation bar with scrollspy functionality.
- * @param {{isDarkMode: boolean, toggleDarkMode: function}} props
+ * Uses ThemeContext for dark mode state and toggle.
  */
-function Navbar({ isDarkMode, toggleDarkMode }) {
+function Navbar() {
+  const { isDarkMode, toggleDarkMode } = useTheme(); // Use context hook
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSectionId, setActiveSectionId] = useState('');
   const navRef = useRef(null); // Ref for the nav element to calculate offset

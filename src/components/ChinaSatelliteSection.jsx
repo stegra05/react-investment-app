@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { ArrowRight, AlertTriangle, ShieldCheck, LineChart, TrendingUp, Zap, Scale, PiggyBank, MapPin, ExternalLink } from 'lucide-react'; // Added more specific icons
 
 /**
@@ -101,5 +102,7 @@ function ChinaSatelliteSection() {
     </section>
   );
 }
+
+// ChinaSatelliteSection doesn't receive props, so no propTypes definition needed.
 
 export default ChinaSatelliteSection; 

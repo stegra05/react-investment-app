@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'; // Import PropTypes
 import { ChevronRight } from 'lucide-react'; // Icon for the details toggle
 
 /**
@@ -31,5 +32,7 @@ function RevisionHistorySection() {
     </section>
   );
 }
+
+// RevisionHistorySection doesn't receive props, so no propTypes definition needed.
 
 export default RevisionHistorySection; 

@@ -1,39 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Chart from 'react-apexcharts';
-
-/**
- * Calculates the projected growth data.
- * @param {number} initial - Initial balance (usually 0)
- * @param {number} monthly - Monthly investment amount
- * @param {number} years - Investment duration in years
- * @param {number} rate - Assumed annual rate of return (e.g., 0.07 for 7%)
- * @returns {Array<{x: number, y: number}>} - Array of data points for the chart
- */
-const calculateGrowth = (initial, monthly, years, rate) => {
-  let balance = initial;
-  const monthlyRate = rate / 12;
-  const data = [{ x: new Date().getFullYear(), y: Math.round(balance) }]; // Start with initial balance at current year
-  let currentYear = new Date().getFullYear();
-
-  for (let year = 1; year <= years; year++) {
-    for (let month = 1; month <= 12; month++) {
-      balance = balance * (1 + monthlyRate) + monthly;
-    }
-    currentYear++;
-    data.push({ x: currentYear, y: Math.round(balance) });
-  }
-  return data;
-};
+import { useTheme } from '../context/ThemeContext'; // Import useTheme
 
 /**
  * Generates chart options based on theme.
- * NOTE: Does not include the 'series' key anymore.
  * @param {boolean} isDark
+ * @param {Array} seriesData - The series data to determine types (area/line)
  * @returns {object} ApexCharts options object
  */
-const getGrowthChartOptions = (isDark) => {
+const getGrowthChartOptions = (isDark, seriesData = []) => {
   const colors = {
-    growthArea: isDark ? ['#a78bfa'] : ['#8b5cf6'], // Violet variants
+    // Define a broader palette for multiple lines + area
+    palette: isDark
+      ? ['#a78bfa', '#f472b6', '#67e8f9', '#a3e635', '#fde047', '#fdba74'] // Purple, Pink, Cyan, Lime, Yellow, Orange (Dark)
+      : ['#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#facc15', '#fb923c'], // Purple, Pink, Cyan, Lime, Yellow, Orange (Light)
     textColor: isDark ? '#d1d5db' : '#374151', // gray-300 / gray-700
     secondaryTextColor: isDark ? '#9ca3af' : '#6b7280', // gray-400 / gray-500
     gridColor: isDark ? '#4b5563' : '#e5e7eb', // gray-600 / gray-200
@@ -42,19 +23,29 @@ const getGrowthChartOptions = (isDark) => {
 
   return {
     chart: {
-      type: 'area',
+      type: 'line', // Set base type to line, individual series can override via seriesData[i].type
       height: 350,
       fontFamily: 'Inter, sans-serif',
       zoom: { enabled: false },
       toolbar: { show: false },
       background: 'transparent'
     },
-    colors: colors.growthArea,
+    colors: colors.palette, // Use the full palette
     dataLabels: { enabled: false },
-    stroke: { curve: 'smooth', width: 2 },
+    stroke: { 
+      curve: 'smooth', 
+      width: seriesData.map(s => s.type === 'area' ? 2 : 3) // Thinner for area, thicker for lines
+    },
     fill: {
-      type: 'gradient',
-      gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: isDark ? 0.1 : 0.3, stops: [0, 90, 100] }
+      // Apply fill only to the 'area' type series
+      type: seriesData.map(s => s.type === 'area' ? 'gradient' : 'solid'),
+      opacity: seriesData.map(s => s.type === 'area' ? 1 : 0.85), // Adjusted opacity
+      gradient: {
+        shadeIntensity: 1,
+        opacityFrom: 0.7,
+        opacityTo: isDark ? 0.1 : 0.3,
+        stops: [0, 90, 100]
+      }
     },
     xaxis: {
       type: 'numeric',
@@ -75,7 +66,27 @@ const getGrowthChartOptions = (isDark) => {
       x: { formatter: (value) => `End of Year: ${Math.round(value)}` },
       y: {
         formatter: (value) => "€" + value.toLocaleString('de-DE'),
-        title: { formatter: (seriesName) => seriesName ? seriesName + ':' : '' }
+        title: { 
+          formatter: (seriesName) => seriesName ? seriesName + ':' : ''
+        }
+      },
+      shared: true, // Tooltip shows all series for a given x-value
+      intersect: false,
+      marker: {
+        show: true,
+      }
+    },
+    legend: {
+      position: 'top',
+      horizontalAlign: 'center',
+      labels: { colors: colors.textColor },
+      markers: { width: 12, height: 12, radius: 6 },
+      itemMargin: { horizontal: 10, vertical: 5 }
+    },
+    markers: {
+      size: 0, // Hide markers by default
+      hover: {
+        sizeOffset: 4
       }
     },
     grid: { borderColor: colors.gridColor, strokeDashArray: 4, padding: { left: 10, right: 10 } }
@@ -83,38 +94,61 @@ const getGrowthChartOptions = (isDark) => {
 };
 
 /**
- * Renders the Growth Projection area chart.
- * @param {{monthlyInvestment: number, annualRate: number, years: number, isDarkMode: boolean}} props
+ * Renders the Growth Projection area/line chart.
+ * @param {{seriesData: Array}} props
+ * Uses ThemeContext.
  */
-function GrowthProjectionChart({ monthlyInvestment, annualRate, years, isDarkMode }) {
-  const [chartData, setChartData] = useState([]);
-  // Initialize options state with default options based on initial theme
-  const [chartOptions, setChartOptions] = useState(() => getGrowthChartOptions(isDarkMode));
+function GrowthProjectionChart({ seriesData }) {
+  const { isDarkMode } = useTheme(); // Use context hook
+  const [chartOptions, setChartOptions] = useState(() => getGrowthChartOptions(isDarkMode, seriesData));
 
   useEffect(() => {
-    // Recalculate data when inputs change
-    const rateDecimal = annualRate / 100;
-    const newGrowthData = calculateGrowth(0, monthlyInvestment, years, rateDecimal);
-    // Prepare series data in the format ApexCharts expects
-    setChartData([{ name: 'Projected Value', data: newGrowthData }]);
-  }, [monthlyInvestment, annualRate, years]);
+    // Update options when theme or series data structure (types) might change
+    setChartOptions(getGrowthChartOptions(isDarkMode, seriesData));
+  }, [isDarkMode, seriesData]);
 
-  useEffect(() => {
-    // Update options only when theme changes
-    setChartOptions(getGrowthChartOptions(isDarkMode));
-  }, [isDarkMode]);
+  // Create dynamic summary for aria-label
+  let ariaLabel = "Growth projection chart.";
+  if (seriesData && seriesData.length > 0) {
+    const liveSeries = seriesData[0]; // Assume first is live data
+    if (liveSeries && liveSeries.data && liveSeries.data.length > 0) {
+      const finalDataPoint = liveSeries.data[liveSeries.data.length - 1];
+      const finalYear = finalDataPoint.x;
+      const finalValue = finalDataPoint.y;
+      ariaLabel = `Growth projection chart based on current inputs, showing an estimated value of approximately €${finalValue.toLocaleString('de-DE')} after year ${finalYear}.`;
+      if (seriesData.length > 1) {
+        ariaLabel += ` ${seriesData.length - 1} saved comparison scenarios are also displayed.`;
+      }
+    }
+  }
 
   return (
-    <div id="growthChartContainer">
+    <div 
+      id="growthChartContainer"
+      role="img" // Identify as graphical content
+      aria-label={ariaLabel} // Provide text alternative
+    >
       <Chart
-        key={isDarkMode ? 'dark' : 'light'}
+        key={isDarkMode ? 'dark' : 'light'} // Re-render on theme change
         options={chartOptions}
-        series={chartData} // Pass chartData state directly to series prop
-        type="area"
+        series={seriesData} // Pass seriesData prop directly
+        type="line" // Base type is line, actual type determined by series data
         height={350}
       />
     </div>
   );
 }
+
+GrowthProjectionChart.propTypes = {
+  seriesData: PropTypes.arrayOf(PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    data: PropTypes.arrayOf(PropTypes.shape({
+      x: PropTypes.any.isRequired, // Year (number) or Date
+      y: PropTypes.number.isRequired,
+    })).isRequired,
+    type: PropTypes.oneOf(['line', 'area']).isRequired,
+    // Might include 'inputs' for saved scenarios, but not strictly needed for rendering
+  })).isRequired,
+};
 
 export default GrowthProjectionChart; 

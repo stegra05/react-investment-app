@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types'; // Import PropTypes
 import { TrendingUp, Zap } from 'lucide-react'; // Icons for compounding and review
 
 /**
@@ -45,5 +46,7 @@ function LongTermViewSection() {
     </section>
   );
 }
+
+// LongTermViewSection doesn't receive props, so no propTypes definition needed.
 
 export default LongTermViewSection; 

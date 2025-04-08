@@ -1,20 +1,31 @@
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import Chart from 'react-apexcharts';
+import { useTheme } from '../context/ThemeContext';
+import { usePlan } from '../context/PlanContext';
 
 /**
- * Generates chart options based on theme.
+ * Generates chart options based on theme and dynamic data.
  * @param {boolean} isDark
  * @param {function} onDataPointSelection - Callback for slice click
+ * @param {Array<{name: string, value: number}>} allocations - The core allocation data
+ * @param {number} coreAmount - The total core investment amount
  * @returns {object} ApexCharts options object
  */
-const getCoreAllocationOptions = (isDark, onDataPointSelection) => {
+const getCoreAllocationOptions = (isDark, onDataPointSelection, allocations, coreAmount) => {
   const colors = {
-    coreDonut: isDark ? ['#818cf8', '#a5b4fc', '#c7d2fe'] : ['#4f46e5', '#6366f1', '#818cf8'], // Indigo variants
+    coreDonut: isDark ? ['#818cf8', '#a5b4fc', '#c7d2fe', '#e0e7ff', '#eef2ff'] : ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe'], // Indigo variants (added more for flexibility)
     textColor: isDark ? '#d1d5db' : '#374151', // gray-300 / gray-700
     secondaryTextColor: isDark ? '#9ca3af' : '#6b7280', // gray-400 / gray-500
     tooltipBg: isDark ? '#1f2937' : '#ffffff', // gray-800 / white
     strokeColor: isDark ? '#1f2937' : '#ffffff' // gray-800 / white for donut borders
   };
+
+  const chartLabels = allocations.map(a => {
+    const percentage = a.value;
+    const amount = coreAmount > 0 ? (percentage / 100 * coreAmount).toFixed(0) : 0;
+    return `${a.name} (€${amount})`;
+  });
 
   return {
     chart: {
@@ -33,7 +44,7 @@ const getCoreAllocationOptions = (isDark, onDataPointSelection) => {
         // mouseLeave: () => { if (onDataPointSelection) onDataPointSelection(null); }
       }
     },
-    labels: ['Global Developed ETF (€300)', 'Europe ETF (€100)', 'Emerging Markets ETF (€100)'],
+    labels: chartLabels,
     colors: colors.coreDonut,
     dataLabels: {
       enabled: true,
@@ -61,9 +72,9 @@ const getCoreAllocationOptions = (isDark, onDataPointSelection) => {
               fontSize: '14px',
               color: colors.secondaryTextColor,
               formatter: function (val, opts) {
-                const label = opts.w.globals.labels[opts.seriesIndex];
-                const amountMatch = label.match(/€(\d+)/);
-                return amountMatch ? `€${amountMatch[1]}` : '';
+                const percentage = opts.w.globals.series[opts.seriesIndex];
+                const amount = coreAmount > 0 ? (percentage / 100 * coreAmount).toFixed(0) : 0;
+                return `€${amount}`;
               }
             },
             total: {
@@ -73,7 +84,7 @@ const getCoreAllocationOptions = (isDark, onDataPointSelection) => {
               fontSize: '14px',
               fontWeight: 'normal',
               color: colors.secondaryTextColor,
-              formatter: () => '€500 / month'
+              formatter: () => `€${coreAmount} / month`
             }
           }
         }
@@ -84,7 +95,7 @@ const getCoreAllocationOptions = (isDark, onDataPointSelection) => {
       fillSeriesColor: false,
       y: {
         formatter: (value) => {
-          const amount = (value / 100 * 500).toFixed(0);
+          const amount = coreAmount > 0 ? (value / 100 * coreAmount).toFixed(0) : 0;
           return `€${amount} (${value.toFixed(0)}%)`;
         },
         title: { formatter: (seriesName) => seriesName.split(' (')[0].trim() + ':' }
@@ -101,19 +112,33 @@ const getCoreAllocationOptions = (isDark, onDataPointSelection) => {
 
 /**
  * Renders the Core Allocation donut chart.
- * @param {{isDarkMode: boolean, onSliceSelect: function}} props
+ * Uses ThemeContext and PlanContext. Receives onSliceSelect prop from parent.
  */
-function CoreAllocationChart({ isDarkMode, onSliceSelect }) {
-  const series = [60, 20, 20]; // Static data for core allocation
-  const [options, setOptions] = useState(getCoreAllocationOptions(isDarkMode, onSliceSelect));
+function CoreAllocationChart({ onSliceSelect }) {
+  const { isDarkMode } = useTheme();
+  const { coreAmount, coreAllocations: allocations } = usePlan();
+
+  const series = allocations.map(a => a.value);
+  const [options, setOptions] = useState(getCoreAllocationOptions(isDarkMode, onSliceSelect, allocations, coreAmount));
 
   useEffect(() => {
-    // Update options only when theme or callback changes
-    setOptions(getCoreAllocationOptions(isDarkMode, onSliceSelect));
-  }, [isDarkMode, onSliceSelect]);
+    // Update options when theme, callback, allocations or coreAmount changes
+    setOptions(getCoreAllocationOptions(isDarkMode, onSliceSelect, allocations, coreAmount));
+  }, [isDarkMode, onSliceSelect, allocations, coreAmount]);
+
+  // Create dynamic summary for aria-label
+  const allocationSummary = allocations.map(a => {
+      const amount = coreAmount > 0 ? (a.value / 100 * coreAmount).toFixed(0) : 0;
+      return `${a.name} at ${a.value}% (€${amount})`;
+  }).join(', ');
+  const ariaLabel = `Donut chart showing core ETF allocation of €${coreAmount} per month: ${allocationSummary}. Click slices to highlight details.`;
 
   return (
-    <div id="coreAllocationChartContainer">
+    <div 
+      id="coreAllocationChartContainer" 
+      role="img" // Identify as graphical content
+      aria-label={ariaLabel} // Provide text alternative
+    >
       <Chart
         options={options}
         series={series}
@@ -123,5 +148,9 @@ function CoreAllocationChart({ isDarkMode, onSliceSelect }) {
     </div>
   );
 }
+
+CoreAllocationChart.propTypes = {
+  onSliceSelect: PropTypes.func.isRequired,
+};
 
 export default CoreAllocationChart; 

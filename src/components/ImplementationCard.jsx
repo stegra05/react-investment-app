@@ -1,5 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { ExternalLink, Globe, Euro, LineChart, Landmark, HandCoins, Rocket, Combine } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Map icon names (or types) to actual Lucide components
 const iconMap = {
@@ -14,9 +16,9 @@ const iconMap = {
 
 /**
  * Renders a single implementation card.
- * @param {{ cardData: object, isHighlighted: boolean }} props
+ * @param {{ cardData: object, isHighlighted: boolean, rationale: string | null }} props
  */
-function ImplementationCard({ cardData, isHighlighted }) {
+function ImplementationCard({ cardData, isHighlighted, rationale }) {
   const { id, title, icon, iconColor = 'indigo', link, description, isin, ter, why, delay, isOptional, isSuggested } = cardData;
 
   const IconComponent = iconMap[icon] || Globe; // Default to Globe if icon not found
@@ -58,10 +60,47 @@ function ImplementationCard({ cardData, isHighlighted }) {
         {description && <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{description}</p>}
         {isin && <p className="text-xs text-gray-500 dark:text-gray-400">ISIN: {isin}</p>}
         {ter && <p className="text-xs text-gray-500 dark:text-gray-400">TER: {ter}</p>}
+
+        {/* Animated rationale display */}
+        <AnimatePresence initial={false}>
+          {isHighlighted && rationale && (
+            <motion.p
+              key="rationale-content"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="text-sm text-indigo-700 dark:text-indigo-400 mt-3 pt-2 border-t border-gray-200 dark:border-gray-700 overflow-hidden"
+            >
+              <strong>Rationale:</strong> {rationale}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
-      {why && <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">{`Why: ${why}`}</p>}
+      {why && !isHighlighted && <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">{`Why: ${why}`}</p>}
     </div>
   );
 }
+
+// Add propTypes definition
+ImplementationCard.propTypes = {
+  cardData: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired, // Title is now dynamically generated
+    baseTitle: PropTypes.string, // Base title might still exist in ImplementationSection
+    icon: PropTypes.string.isRequired,
+    iconColor: PropTypes.string,
+    link: PropTypes.string, // Can be null
+    description: PropTypes.string,
+    isin: PropTypes.string,
+    ter: PropTypes.string,
+    why: PropTypes.string,
+    delay: PropTypes.number,
+    isOptional: PropTypes.bool,
+    isSuggested: PropTypes.bool,
+  }).isRequired,
+  isHighlighted: PropTypes.bool.isRequired,
+  rationale: PropTypes.string, // Can be null
+};
 
 export default ImplementationCard; 

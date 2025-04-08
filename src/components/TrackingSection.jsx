@@ -1,5 +1,6 @@
 import React from 'react';
-import { BarChart3 } from 'lucide-react'; // Icon for tracking
+import PropTypes from 'prop-types'; // Import PropTypes
+import { BarChart, TrendingDown, TrendingUp, Percent } from 'lucide-react'; // Icon for tracking
 
 /**
  * Renders the Portfolio Tracking section.
@@ -12,7 +13,7 @@ function TrackingSection() {
       </h2>
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-700">
         <h3 className="text-xl font-semibold mb-3 text-indigo-700 dark:text-indigo-400 flex items-center">
-          <BarChart3 size={18} className="mr-2" />
+          <BarChart size={18} className="mr-2" />
           Keep an Eye on Your Investments
         </h3>
         <div className="text-gray-700 dark:text-gray-300 space-y-4 text-sm">
@@ -34,5 +35,7 @@ function TrackingSection() {
     </section>
   );
 }
+
+// TrackingSection doesn't receive props, so no propTypes definition needed.
 
 export default TrackingSection; 
