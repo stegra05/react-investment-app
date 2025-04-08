@@ -3,17 +3,19 @@
 @tailwind utilities;
 
 /* Migrated from original base.css */
-body {
-  font-family: 'Inter', sans-serif;
-  scroll-behavior: smooth;
-}
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
+  }
 
-html {
-  scroll-behavior: smooth;
-}
+  html {
+    scroll-behavior: smooth;
+  }
 
-/* Ensure elements are hidden initially for AOS */
-[data-aos] {
-   opacity: 0;
-   transition-property: transform, opacity;
- } 
+  /* Ensure elements are hidden initially for AOS */
+  [data-aos] {
+     opacity: 0;
+     transition-property: transform, opacity;
+   }
+} 
