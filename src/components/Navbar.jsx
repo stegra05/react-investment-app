@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Menu, X, Sun, Moon, LineChart } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext'; // Import useTheme hook
+import CenteredNav from './CenteredNav'; // Import the new component
+import './CenteredNav.css'; // Import the CSS needed by CenteredNav
 
 /**
  * Renders the navigation bar with scrollspy functionality.
@@ -78,16 +80,12 @@ function Navbar() {
             <LineChart className="h-6 w-6 text-indigo-600 dark:text-indigo-400 mr-2" aria-hidden="true" />
             <span className="font-bold text-lg text-gray-900 dark:text-white">Investment Plan</span>
           </div>
-          <div className="hidden md:flex md:items-center md:space-x-1 lg:space-x-2 xl:space-x-4">
-            {navLinks.map((link) => (
-              <a
-                key={link.id}
-                href={`#${link.id}`}
-                className={activeSectionId === link.id ? activeNavClasses : baseNavClasses}
-              >
-                {link.text}
-              </a>
-            ))}
+          {/* Desktop Navigation - Replaced with CenteredNav */}
+          <div className="hidden md:flex md:items-center flex-grow min-w-0 mx-4">
+            <CenteredNav items={navLinks} activeItemId={activeSectionId} />
+          </div>
+          {/* Theme Toggle Button (Desktop) - Moved outside the flex-grow container if needed, or keep here */}
+          <div className="hidden md:flex md:items-center">
             <button
               id="darkModeToggleDesktop"
               aria-label="Toggle Dark Mode"

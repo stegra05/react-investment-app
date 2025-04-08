@@ -1,0 +1,31 @@
+/* Styles for CenteredNav Component */
+
+.centered-nav-container {
+  /* Optional: Add styles if needed for the outer container */
+}
+
+.centered-nav-items {
+  position: relative; /* Needed for absolute positioning of the indicator */
+  /* Hide scrollbar across browsers */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.centered-nav-items::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.centered-nav-item {
+  /* Base styles are applied via Tailwind */
+}
+
+.nav-item-active {
+  /* Active styles applied via Tailwind */
+  /* We might need this class if specific non-Tailwind active styles are desired */
+}
+
+.nav-indicator {
+  /* Base styles (height, bg-color) in Tailwind */
+  /* Smooth transition for width and horizontal movement */
+  transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
+} 
