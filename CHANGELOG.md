@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Nothing new yet!
+### Changed
+- Refactored `Navbar` component to integrate `CenteredNav` for improved desktop navigation.
 
 ## [0.3.0] - 2025-04-08
 ### Added
