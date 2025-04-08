@@ -31,8 +31,9 @@ Built with modern web technologies, the application features a responsive design
 ## Features
 
 *   **Component-Based Structure:** Organized into reusable React components for different sections (Overview, Core Portfolio, China Satellite, Tax, Implementation, etc.).
-*   **Interactive Core Portfolio Allocation:** Donut chart visualizing core ETF allocation, with clickable slices highlighting corresponding implementation examples.
-*   **Interactive Growth Projection:** Allows users to adjust monthly investment, assumed annual rate, and time horizon to see projected growth visualized in an area chart.
+*   **Interactive Core Portfolio Allocation:** Donut chart visualizing core ETF allocation. Clickable slices now smoothly scroll to and highlight corresponding implementation examples with a subtle pulse animation. Highlight clears on re-click or click-outside.
+*   **Interactive Growth Projection:** Allows users to adjust monthly investment, assumed annual rate, and time horizon to see projected growth visualized in an area chart. Input feedback responsiveness improved.
+*   **Contextual Help:** Key financial terms (e.g., Sparer-Pauschbetrag, Vorabpauschale, TER, ISIN) now include informational tooltips on hover.
 *   **Tax Calculator:** Simple calculator for the German *Sparer-Pauschbetrag* (tax-free allowance).
 *   **Dark Mode:** Supports toggling between light and dark themes, with preferences saved in local storage.
 *   **Responsive Design:** Utilizes Tailwind CSS for a mobile-first, responsive layout.
@@ -134,15 +135,19 @@ react-investment-app/
 ## Styling
 
 *   **Tailwind CSS:** Primary styling method using utility classes. Configuration is in `tailwind.config.js`. Base styles and Tailwind directives are included in `src/base.css`.
-*   **Custom CSS:** Component-specific styles (e.g., range input styling, chart text adjustments, card highlighting) are located in `src/components.css`.
+*   **Custom CSS:** Component-specific styles (e.g., range input styling, chart text adjustments, card highlighting and animation) are located in `src/components.css`.
 
 ## Future Enhancements / TODOs
 
 *   Add PropTypes or migrate to TypeScript for better type safety.
 *   Perform a more thorough accessibility (A11y) audit.
 *   Add unit tests (e.g., for `calculateGrowth`, `TaxCalculator`) and potentially component/integration tests.
-*   Refine the logic for clearing the highlighted implementation card (e.g., click outside).
-*   Consider using React Context for managing `isDarkMode` state instead of prop drilling if the application grows significantly.
+*   Implement dynamic text updates based on configuration (Section 2 TODO).
+*   Implement goal-seeking calculation in Growth Projection (Section 2 TODO).
+*   Enhance Tax Section visualization/integration (Section 2 TODO).
+*   Implement Strategy Template Selection (Section 2 TODO).
+*   Implement "What If" Scenario Builder (Section 2 TODO).
+*   Consider using React Context for managing plan configuration state (`PlanContext`).
 *   Make the "Last Reviewed" date in `OverviewSection` dynamic or easily configurable.
 *   Fetch `RevisionHistory` data dynamically if needed.
 *   Add a `LICENSE` file.

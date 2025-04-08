@@ -43,6 +43,8 @@ function AppContent() {
 
   // Ref container for implementation card DOM elements
   const implementationCardRefs = useRef({});
+  // Ref for the core portfolio section
+  const chartSectionRef = useRef(null);
 
   // Callback to register refs from ImplementationSection
   const registerCardRef = useCallback((index, element) => {
@@ -68,6 +70,33 @@ function AppContent() {
       setHighlightedRationale(null); // Clear rationale if index is null or invalid
     }
   }, [highlightedCoreIndex]);
+
+  // Effect for click-outside listener to clear highlight
+  useEffect(() => {
+    if (highlightedCoreIndex === null) return; // Only listen when something is highlighted
+
+    const handleClickOutside = (event) => {
+      // Check if the click is outside the chart section
+      const isOutsideChart = chartSectionRef.current && !chartSectionRef.current.contains(event.target);
+      
+      // Check if the click is outside all implementation cards
+      const isOutsideCards = Object.values(implementationCardRefs.current).every(
+        (cardRef) => cardRef && !cardRef.contains(event.target)
+      );
+
+      if (isOutsideChart && isOutsideCards) {
+        setHighlightedCoreIndex(null);
+      }
+    };
+
+    // Add listener
+    document.addEventListener('mousedown', handleClickOutside);
+
+    // Cleanup listener on unmount or when highlight changes
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [highlightedCoreIndex]); // Re-run when highlight changes
 
   // Callback for the Core Allocation Chart slice selection
   const handleCoreSliceSelect = (index) => {
@@ -110,6 +139,7 @@ function AppContent() {
             setCoreAllocations={setCoreAllocations}
           />
           <CorePortfolioSection
+            ref={chartSectionRef}
             onSliceSelect={handleCoreSliceSelect}
             highlightedRationale={highlightedRationale}
             coreAmount={coreAmount}

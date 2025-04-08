@@ -1,7 +1,31 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, BoxSelect } from 'lucide-react';
 import { usePlan } from '../context/PlanContext'; // Import usePlan hook
+
+// Define Templates
+const templates = {
+  default: {
+    name: "Default 60/20/20",
+    totalInvestment: 600,
+    coreAmount: 500,
+    coreAllocations: [
+      { name: 'Global Dev.', value: 60 },
+      { name: 'Europe', value: 20 },
+      { name: 'EM', value: 20 },
+    ]
+  },
+  higherCore: {
+    name: "Higher Core 70/15/15",
+    totalInvestment: 700,
+    coreAmount: 600,
+    coreAllocations: [
+      { name: 'Global Dev.', value: 70 },
+      { name: 'Europe', value: 15 },
+      { name: 'EM', value: 15 },
+    ]
+  }
+};
 
 /**
  * Allows configuration of the investment plan parameters.
@@ -67,6 +91,18 @@ function ConfigurationSection() {
         setAllocationError(`Allocations must sum to 100% (current: ${currentSum}%)`);
         // Don't update parent state yet
     }
+  };
+
+  // Handler for applying a template
+  const applyTemplate = (templateKey) => {
+    const template = templates[templateKey];
+    if (!template) return;
+
+    setTotalInvestment(template.totalInvestment);
+    setCoreAmount(template.coreAmount);
+    setCoreAllocations(template.coreAllocations); // Update context
+    setLocalAllocations(template.coreAllocations); // Update local state for UI sync
+    setAllocationError(''); // Clear any existing error
   };
 
   return (
@@ -136,6 +172,31 @@ function ConfigurationSection() {
           </p>
         </div>
       </div>
+
+      {/* --- Template Selection --- */}
+      <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-600">
+        <h3 className="text-lg font-semibold mb-3 text-indigo-700 dark:text-indigo-400 flex items-center">
+          <BoxSelect size={20} className="mr-2" /> Load a Template
+        </h3>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => applyTemplate('default')}
+            className="px-3 py-1.5 text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md shadow-sm transition duration-150"
+            title={`Load: ${templates.default.totalInvestment} Total, ${templates.default.coreAmount} Core, ${templates.default.coreAllocations.map(a=>a.value).join('/')}`}
+          >
+            {templates.default.name}
+          </button>
+          <button
+            onClick={() => applyTemplate('higherCore')}
+            className="px-3 py-1.5 text-sm bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md shadow-sm transition duration-150"
+             title={`Load: ${templates.higherCore.totalInvestment} Total, ${templates.higherCore.coreAmount} Core, ${templates.higherCore.coreAllocations.map(a=>a.value).join('/')}`}
+          >
+             {templates.higherCore.name}
+          </button>
+          {/* Add more template buttons here if needed */}
+        </div>
+      </div>
+
     </section>
   );
 }

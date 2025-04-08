@@ -2,6 +2,7 @@ import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import { ExternalLink, Globe, Euro, LineChart, Landmark, HandCoins, Rocket, Combine } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import InfoTooltip from './InfoTooltip';
 
 // Map icon names (or types) to actual Lucide components
 const iconMap = {
@@ -58,8 +59,12 @@ const ImplementationCard = forwardRef(({ cardData, isHighlighted, rationale }, r
           )}
         </div>
         {description && <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{description}</p>}
-        {isin && <p className="text-xs text-gray-500 dark:text-gray-400">ISIN: {isin}</p>}
-        {ter && <p className="text-xs text-gray-500 dark:text-gray-400">TER: {ter}</p>}
+        {isin && <p className="text-xs text-gray-500 dark:text-gray-400">
+          <InfoTooltip term="ISIN" definition="International Securities Identification Number: A unique code identifying a specific security." />: {isin}
+        </p>}
+        {ter && <p className="text-xs text-gray-500 dark:text-gray-400">
+          <InfoTooltip term="TER" definition="Total Expense Ratio: Annual cost of managing and operating an investment fund (like an ETF), expressed as a percentage of the fund's assets." />: {ter}
+        </p>}
 
         {/* Animated rationale display */}
         <AnimatePresence initial={false}>

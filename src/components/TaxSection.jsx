@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'; // Import PropTypes
 import { ExternalLink, Info, AlertTriangle } from 'lucide-react';
 import TaxCalculator from './TaxCalculator'; // Component for Sparer-Pauschbetrag
 import VorabpauschaleEstimator from './VorabpauschaleEstimator'; // Import the new estimator
+import InfoTooltip from './InfoTooltip'; // Import the tooltip component
 
 /**
  * Renders the German Tax Efficiency section.
@@ -20,9 +21,9 @@ function TaxSection() {
             <p>Understanding German tax rules is important for maximizing long-term returns. Key aspects include:</p>
             <ul className="list-disc list-inside space-y-1 text-sm">
               <li><strong>Kapitalertragssteuer:</strong> A flat tax rate (currently ~26.375% including solidarity surcharge) applies to most investment income like dividends, interest, and capital gains upon selling assets held in a standard brokerage account.</li>
-              <li><strong>Sparer-Pauschbetrag:</strong> An annual tax-free allowance for capital gains and income. For individuals, it's €1,000; for jointly assessed couples, it's €2,000 (as of 2024). Only income exceeding this allowance is taxed.</li>
-              <li><strong>Vorabpauschale:</strong> A specific rule for accumulating funds (like the example ETFs) that don't pay out dividends.</li>
-              <li><strong>Teilfreistellung:</strong> Partial tax exemptions apply based on the fund type (e.g., 30% for equity funds with &gt;50% equity). This reduces the taxable amount of both distributions and capital gains.</li>
+              <li><InfoTooltip term="Sparer-Pauschbetrag" definition="Annual tax-free allowance for capital gains and investment income (€1,000 for singles, €2,000 for couples in 2024). Only income above this is taxed." />: An annual tax-free allowance for capital gains and income. For individuals, it's €1,000; for jointly assessed couples, it's €2,000 (as of 2024). Only income exceeding this allowance is taxed.</li>
+              <li><InfoTooltip term="Vorabpauschale" definition="Potential annual tax prepayment on future capital gains for accumulating funds. Calculated based on a base rate ('Basiszins') but capped by actual fund performance. Tax paid reduces eventual capital gains tax." />: A specific rule for accumulating funds (like the example ETFs) that don't pay out dividends.</li>
+              <li><InfoTooltip term="Teilfreistellung" definition="Partial tax exemption on investment returns based on fund type (e.g., 30% for equity funds). Reduces the taxable amount for distributions, the Vorabpauschale, and capital gains." />: Partial tax exemptions apply based on the fund type (e.g., 30% for equity funds with &gt;50% equity). This reduces the taxable amount of both distributions and capital gains.</li>
             </ul>
           </div>
         </div>
@@ -39,8 +40,8 @@ function TaxSection() {
                Germany implemented the 'Vorabpauschale' (preliminary lump sum). This is a *potential* annual tax prepayment on *future* capital gains.
              </p>
              <p>
-               It's calculated based on the fund's value at the start of the year, the official 'Basiszins' (base rate, derived from government bond yields), and the fund's actual performance during the year.
-               Crucially, the taxable base amount ('Basisertrag') is capped by the fund's actual gains – if the fund has a loss, the Vorabpauschale is zero for that year.
+               It's calculated based on the fund's value at the start of the year, the official <InfoTooltip term="Basiszins" definition="Base interest rate set annually by the German Ministry of Finance, derived from government bond yields. Used to calculate the Basisertrag for the Vorabpauschale." /> (base rate, derived from government bond yields), and the fund's actual performance during the year.
+               Crucially, the taxable base amount (<InfoTooltip term="Basisertrag" definition="The base income calculated for the Vorabpauschale (Fund Value * Basiszins * 0.7). It's capped by the fund's actual gain in value for the year." />) is capped by the fund's actual gains – if the fund has a loss, the Vorabpauschale is zero for that year.
                For equity funds, only 70% of the Basisertrag is used for calculation, and then the 30% Teilfreistellung is applied to the resulting Vorabpauschale before tax is calculated.
              </p>
              <p>

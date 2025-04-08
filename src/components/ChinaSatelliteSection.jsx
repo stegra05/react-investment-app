@@ -1,22 +1,28 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ArrowRight, AlertTriangle, ShieldCheck, LineChart, TrendingUp, Zap, Scale, PiggyBank, MapPin, ExternalLink } from 'lucide-react'; // Added more specific icons
+import { usePlan } from '../context/PlanContext'; // Import usePlan
 
 /**
  * Renders the China Satellite section.
  */
 function ChinaSatelliteSection() {
+  const { totalInvestment, satelliteAmount } = usePlan(); // Use context hook
+
+  // Calculate percentage dynamically
+  const chinaPercentage = totalInvestment > 0 ? Math.round((satelliteAmount / totalInvestment) * 100) : 0;
+
   return (
     <section id="china-satellite" className="mb-16 scroll-mt-16" data-aos="fade-up">
       <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 border-b pb-2 border-gray-300 dark:border-gray-600">
-        China Satellite: Higher Growth Potential (€100 per month)
+        China Satellite: Higher Growth Potential (€{satelliteAmount} per month)
       </h2>
       <div className="grid md:grid-cols-2 gap-8 items-start">
         {/* Opportunities vs Risks Card */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-700">
           <h3 className="text-xl font-semibold mb-4 text-rose-700 dark:text-rose-400">Opportunities vs. Risks</h3>
           <p className="text-sm text-gray-700 dark:text-gray-300 mb-6">
-            This smaller allocation (€100/month) targets potentially higher returns via China's dynamic economy, but involves increased volatility and specific risks:
+            This smaller allocation (€{satelliteAmount}/month) targets potentially higher returns via China's dynamic economy, but involves increased volatility and specific risks:
           </p>
           <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-6">
             <div>
@@ -76,7 +82,7 @@ function ChinaSatelliteSection() {
 
         {/* Allocation Approaches Card */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-700">
-          <h3 className="text-xl font-semibold mb-3 text-rose-700 dark:text-rose-400">Allocation Approaches (€100/month)</h3>
+          <h3 className="text-xl font-semibold mb-3 text-rose-700 dark:text-rose-400">Allocation Approaches (€{satelliteAmount}/month)</h3>
           <div className="space-y-4">
             <div>
               <h4 className="font-semibold text-gray-800 dark:text-gray-200">1. Balanced Approach:</h4>
@@ -88,13 +94,13 @@ function ChinaSatelliteSection() {
             </div>
             <div>
               <h4 className="font-semibold text-gray-800 dark:text-gray-200">3. Combined Approach (Plan Suggestion):</h4>
-              <p className="text-gray-700 dark:text-gray-300 text-sm">Split €100 (e.g., €50 Broad ETF + €50 Stock/Thematic). Balanced risk.</p>
+              <p className="text-gray-700 dark:text-gray-300 text-sm">Split €{satelliteAmount} (e.g., €{Math.round(satelliteAmount/2)} Broad ETF + €{Math.round(satelliteAmount/2)} Stock/Thematic). Balanced risk.</p>
             </div>
           </div>
           <div className="mt-6 p-4 bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700/50 rounded-lg">
             <p className="text-sm text-rose-800 dark:text-rose-300 font-medium flex items-center">
               <AlertTriangle size={20} className="mr-2 flex-shrink-0" />
-              <strong>Important:</strong> Keep total China allocation capped (~17%). Invest only amounts you can afford potential large swings on.
+              <strong>Important:</strong> Keep total China allocation capped (~{chinaPercentage}%). Invest only amounts you can afford potential large swings on.
             </p>
           </div>
         </div>
@@ -104,5 +110,6 @@ function ChinaSatelliteSection() {
 }
 
 // ChinaSatelliteSection doesn't receive props, so no propTypes definition needed.
+// Needs PlanProvider in parent component tree.
 
 export default ChinaSatelliteSection; 

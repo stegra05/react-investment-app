@@ -156,7 +156,7 @@ function GrowthProjectionSection() {
   }, [goalTargetValue, goalDuration, goalReturnRate]);
 
   // --- Debounced Handlers for Live Projection Inputs ---
-  const DEBOUNCE_DELAY = 300; // milliseconds
+  const DEBOUNCE_DELAY = 150; // milliseconds (Reduced from 300ms for responsiveness)
 
   const debouncedSetInitialInvestment = useDebouncedCallback(setInitialInvestment, DEBOUNCE_DELAY);
   const debouncedSetMonthlyInvestment = useDebouncedCallback(setMonthlyInvestment, DEBOUNCE_DELAY);

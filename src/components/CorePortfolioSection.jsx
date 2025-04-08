@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import CoreAllocationChart from './CoreAllocationChart';
 import { useTheme } from '../context/ThemeContext'; // Import useTheme
@@ -8,15 +8,15 @@ import { usePlan } from '../context/PlanContext'; // Import usePlan
  * Renders the Core Portfolio section, including the allocation chart.
  * Uses ThemeContext and PlanContext. Receives highlight props from App.
  */
-function CorePortfolioSection({ 
+const CorePortfolioSection = forwardRef(({ 
   onSliceSelect, 
   highlightedRationale
-}) {
+}, ref) => {
   const { isDarkMode } = useTheme(); // Get theme context
   const { coreAmount, coreAllocations } = usePlan(); // Get plan context
 
   return (
-    <section id="core-portfolio" className="mb-16 scroll-mt-16" data-aos="fade-up">
+    <section ref={ref} id="core-portfolio" className="mb-16 scroll-mt-16" data-aos="fade-up">
       <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 border-b pb-2 border-gray-300 dark:border-gray-600">
         Core Portfolio: Stable Growth (€{coreAmount} per month)
       </h2>
@@ -57,12 +57,14 @@ function CorePortfolioSection({
       </div>
     </section>
   );
-}
+});
 
 // Update propTypes definition
 CorePortfolioSection.propTypes = {
   onSliceSelect: PropTypes.func.isRequired,
   highlightedRationale: PropTypes.string, // Can be null
 };
+
+CorePortfolioSection.displayName = 'CorePortfolioSection';
 
 export default CorePortfolioSection; 

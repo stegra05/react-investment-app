@@ -1,11 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types'; // Import PropTypes
 import { TrendingUp, Zap } from 'lucide-react'; // Icons for compounding and review
+import { usePlan } from '../context/PlanContext'; // Import usePlan
 
 /**
  * Renders the Long-Term View section.
  */
 function LongTermViewSection() {
+  const { totalInvestment } = usePlan(); // Use context hook
+
   return (
     <section id="long-term" className="mb-16 scroll-mt-16" data-aos="fade-up">
       <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 border-b pb-2 border-gray-300 dark:border-gray-600">
@@ -19,7 +22,7 @@ function LongTermViewSection() {
               Compounding & Consistency
             </h3>
             <p className="text-gray-700 dark:text-gray-300 mb-4">
-              Consistent €600 monthly investments (dollar-cost averaging) combined with long-term compounding of reinvested earnings drives potential portfolio growth.
+              Consistent €{totalInvestment} monthly investments (dollar-cost averaging) combined with long-term compounding of reinvested earnings drives potential portfolio growth.
               Staying invested through market cycles is key.
             </p>
           </div>
@@ -48,5 +51,6 @@ function LongTermViewSection() {
 }
 
 // LongTermViewSection doesn't receive props, so no propTypes definition needed.
+// Needs PlanProvider in parent component tree.
 
 export default LongTermViewSection; 
